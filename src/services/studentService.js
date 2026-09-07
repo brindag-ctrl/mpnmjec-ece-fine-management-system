@@ -42,7 +42,7 @@ export const studentService = {
    */
   syncOfficialStudentsToFirebase: async () => {
     if (isFirebaseConfigured() && db) {
-      console.log('⚡ Syncing 53 Official 2nd Year ECE Students to Cloud Firestore...');
+      console.log(`⚡ Syncing ${OFFICIAL_ECE_STUDENTS.length} Official ECE Students to Cloud Firestore...`);
       const nowIso = new Date().toISOString();
       const syncedList = [];
 
@@ -53,8 +53,8 @@ export const studentService = {
           name: std.name,
           registerNumber: std.registerNumber,
           department: 'ECE',
-          year: '2nd',
-          phone: '',
+          year: std.year || '2nd',
+          phone: std.phone || '',
           createdAt: nowIso,
           updatedAt: nowIso,
         };
@@ -69,7 +69,7 @@ export const studentService = {
       }
 
       saveLocalStudents(syncedList);
-      console.log('✅ Successfully synced 53 official 2nd Year ECE students to Firestore!');
+      console.log(`✅ Successfully synced all ${OFFICIAL_ECE_STUDENTS.length} official ECE students (2nd, 3rd, 4th Year) to Firestore!`);
       return syncedList;
     }
 
