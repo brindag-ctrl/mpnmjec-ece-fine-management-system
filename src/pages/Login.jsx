@@ -12,8 +12,8 @@ import { CollegeLogo } from '../components/CollegeLogo';
 
 export const Login = () => {
   const { login } = useAuth();
-  const [email, setEmail] = useState('ece-admin@mpnmjec.ac.in');
-  const [password, setPassword] = useState('eceadmin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -83,7 +83,7 @@ export const Login = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="ece-admin@mpnmjec.ac.in"
+                  placeholder="e.g. staff@mpnmjec.ac.in"
                   className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 hover:bg-slate-100/70 border border-slate-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:bg-white focus:border-red-600 focus:ring-4 focus:ring-red-500/10 transition-all font-medium"
                 />
               </div>

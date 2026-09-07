@@ -8,15 +8,6 @@ import { auth, isFirebaseConfigured } from '../services/firebase';
 
 const AuthContext = createContext(null);
 
-const DEFAULT_ADMIN = {
-  uid: 'admin_ece_mpnmjec',
-  email: 'ece-admin@mpnmjec.ac.in',
-  displayName: 'Prof. S. Ranganathan (HOD / ECE)',
-  role: 'Department Administrator',
-  department: 'Electronics and Communication Engineering',
-  college: 'M.P. Nachimuthu M. Jaganathan Engineering College',
-};
-
 const LOCAL_STORAGE_AUTH_KEY = 'mpnmjec_ece_auth_user';
 
 export const AuthProvider = ({ children }) => {
@@ -58,14 +49,17 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (email, password) => {
-    // 1. Try Firebase Auth if configured
+    // Strict Live Firebase Authentication
     if (isFirebaseConfigured() && auth) {
       try {
-        const result = await signInWithEmailAndPassword(auth, email, password);
+        const result = await signInWithEmailAndPassword(auth, email.trim(), password);
+        const fbUser = result.user;
+        const nameFromEmail = fbUser.email ? fbUser.email.split('@')[0].toUpperCase() : 'ECE Staff';
+        
         const authData = {
-          uid: result.user.uid,
-          email: result.user.email,
-          displayName: result.user.displayName || 'ECE Department Staff',
+          uid: fbUser.uid,
+          email: fbUser.email,
+          displayName: fbUser.displayName || `${nameFromEmail} (ECE Faculty)`,
           role: 'Department Administrator',
           department: 'Electronics and Communication Engineering',
           college: 'M.P. Nachimuthu M. Jaganathan Engineering College',
@@ -74,55 +68,22 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authData));
         return authData;
       } catch (fbErr) {
-        console.warn('Firebase login failed, testing fallback admin credentials:', fbErr);
-        // If it's the standard demo credentials, allow fallback
-        if (
-          (email.trim().toLowerCase() === 'ece-admin@mpnmjec.ac.in' || email.trim().toLowerCase() === 'admin@ece.edu' || email.trim().toLowerCase() === 'admin@mpnmjec.ac.in') &&
-          password === 'eceadmin123'
-        ) {
-          const demoUser = { ...DEFAULT_ADMIN, email: email.trim().toLowerCase() };
-          setUser(demoUser);
-          localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(demoUser));
-          return demoUser;
+        console.error('Firebase authentication error:', fbErr);
+        let errorMsg = 'Authentication failed. Please check your credentials.';
+        if (fbErr.code === 'auth/invalid-credential' || fbErr.code === 'auth/wrong-password' || fbErr.code === 'auth/user-not-found') {
+          errorMsg = 'Invalid email address or password. Please verify your credentials in Firebase.';
+        } else if (fbErr.code === 'auth/too-many-requests') {
+          errorMsg = 'Too many failed login attempts. Please try again later.';
+        } else if (fbErr.code === 'auth/network-request-failed') {
+          errorMsg = 'Network error. Please check your internet connection.';
+        } else if (fbErr.message) {
+          errorMsg = fbErr.message;
         }
-        throw fbErr;
+        throw new Error(errorMsg);
       }
     }
 
-    // 2. Demo / Fallback Authentication Mode
-    if (
-      (email.trim().toLowerCase() === 'ece-admin@mpnmjec.ac.in' || 
-       email.trim().toLowerCase() === 'admin@ece.edu' || 
-       email.trim().toLowerCase() === 'admin@mpnmjec.ac.in' ||
-       email.trim().toLowerCase() === 'faculty@mpnmjec.ac.in') &&
-      (password === 'eceadmin123' || password === 'admin123' || password === 'password')
-    ) {
-      const authUser = {
-        ...DEFAULT_ADMIN,
-        email: email.trim().toLowerCase(),
-        displayName: email.includes('faculty') ? 'Dr. M. Venkatesan (ECE Faculty)' : 'Prof. S. Ranganathan (HOD / ECE)',
-      };
-      setUser(authUser);
-      localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authUser));
-      return authUser;
-    }
-
-    // Also support any valid email + password for instant testing convenience if in demo mode
-    if (email && password && password.length >= 6) {
-      const authUser = {
-        uid: 'user_' + Date.now(),
-        email: email.trim(),
-        displayName: email.split('@')[0].toUpperCase() + ' (Staff)',
-        role: 'Department Staff',
-        department: 'Electronics and Communication Engineering',
-        college: 'M.P. Nachimuthu M. Jaganathan Engineering College',
-      };
-      setUser(authUser);
-      localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authUser));
-      return authUser;
-    }
-
-    throw new Error('Invalid email or password. Use demo credentials or password with at least 6 characters.');
+    throw new Error('Firebase Authentication is not configured in .env file.');
   };
 
   const logout = async () => {
