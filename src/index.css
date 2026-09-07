@@ -17,6 +17,32 @@
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
   }
+
+  /* Global Hand Cursor Rules for all interactive elements */
+  button,
+  a,
+  select,
+  summary,
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"]::-webkit-file-upload-button,
+  label,
+  [role="button"],
+  [role="tab"],
+  [role="menuitem"],
+  [role="option"],
+  .cursor-pointer {
+    cursor: pointer !important;
+  }
+
+  /* Table rows and hoverable interactive components */
+  tbody tr[class*="hover:"],
+  .light-card-hover {
+    cursor: pointer;
+  }
 }
 
 /* Custom Clean Scrollbars */
