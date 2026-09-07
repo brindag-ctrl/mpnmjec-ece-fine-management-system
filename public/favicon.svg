@@ -1,0 +1,12 @@
+<svg viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M 50 45 L 65 15 L 85 35 L 100 10 L 115 35 L 135 15 L 150 45 Z" fill="#1e293b" stroke="#0f172a" stroke-width="2"/>
+  <circle cx="65" cy="13" r="3.5" fill="#f59e0b"/>
+  <circle cx="100" cy="8" r="4" fill="#f59e0b"/>
+  <circle cx="135" cy="13" r="3.5" fill="#f59e0b"/>
+  <circle cx="100" cy="105" r="82" stroke="#0f172a" stroke-width="3" fill="#ffffff"/>
+  <circle cx="100" cy="105" r="74" fill="#c81e1e" stroke="#991b1b" stroke-width="2"/>
+  <circle cx="100" cy="105" r="54" fill="#ffffff" stroke="#0f172a" stroke-width="2.5"/>
+  <path d="M 100 60 Q 94 85 94 118 L 106 118 Q 106 85 100 60 Z" fill="#f8fafc" stroke="#0f172a" stroke-width="1.8"/>
+  <path d="M 20 152 L 45 140 L 155 140 L 180 152 L 165 168 L 150 162 L 150 174 L 100 178 L 50 174 L 50 162 L 35 168 Z" fill="#1e3a8a" stroke="#0f172a" stroke-width="2"/>
+  <text x="100" y="163" fill="#ffffff" font-size="8.5" font-weight="900" letter-spacing="0.8" text-anchor="middle">EDUCATION ★ ENTERPRISE ★ EXCEL</text>
+</svg>
