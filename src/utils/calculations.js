@@ -28,14 +28,16 @@ export const calculateFinancials = (fines = []) => {
     }
   });
 
-  const totalAmount = paidAmount + pendingAmount + cancelledAmount;
+  const round2 = (num) => Math.round((Number(num) || 0) * 100) / 100;
+
+  const totalAmount = round2(paidAmount + pendingAmount + cancelledAmount);
   const totalCount = fines.length;
 
   return {
     totalAmount,
-    paidAmount, // Treasury / Collected Amount
-    pendingAmount, // Pending Fine
-    cancelledAmount, // Cancelled Fine
+    paidAmount: round2(paidAmount), // Treasury / Collected Amount
+    pendingAmount: round2(pendingAmount), // Pending Fine
+    cancelledAmount: round2(cancelledAmount), // Cancelled Fine
     totalCount,
     paidCount,
     unpaidCount,
@@ -55,11 +57,12 @@ export const calculateStudentStats = (studentFines = []) => {
 };
 
 export const formatCurrency = (amount = 0) => {
+  const val = Number(amount) || 0;
   return new Intl.NumberFormat('en-IN', {
     style: 'currency',
     currency: 'INR',
     maximumFractionDigits: 0,
-  }).format(amount);
+  }).format(val);
 };
 
 export const formatDate = (dateStringOrTimestamp) => {

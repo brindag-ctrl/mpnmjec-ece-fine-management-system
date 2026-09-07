@@ -13,8 +13,8 @@ import {
   CheckSquare,
   Square,
   AlertTriangle,
-  X
 } from 'lucide-react';
+import { formatCurrency } from '../utils/calculations';
 
 export const Students = ({
   students = [],
@@ -293,7 +293,7 @@ export const Students = ({
                       <td className="p-3.5 text-center">
                         {fineSummary.unpaidCount > 0 ? (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                            ₹{fineSummary.unpaidAmount} Pending ({fineSummary.unpaidCount})
+                            {formatCurrency(fineSummary.unpaidAmount)} Pending ({fineSummary.unpaidCount})
                           </span>
                         ) : fineSummary.totalCount > 0 ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-300">

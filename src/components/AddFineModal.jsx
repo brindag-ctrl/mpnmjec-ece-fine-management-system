@@ -223,7 +223,7 @@ export const AddFineModal = ({
                 <input
                   type="number"
                   min="1"
-                  step="10"
+                  step="1"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
                   placeholder="e.g. 150"
