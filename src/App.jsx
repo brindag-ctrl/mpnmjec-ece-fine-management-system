@@ -18,7 +18,6 @@ import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
 import { StudentDetails } from './pages/StudentDetails';
 import { Fines } from './pages/Fines';
-import { Reports } from './pages/Reports';
 import { Settings } from './pages/Settings';
 
 export const App = () => {
@@ -370,10 +369,6 @@ export const App = () => {
                   onViewStudentHistory={handleViewStudentProfile}
                   onOpenReceipt={(fine) => setReceiptModalFine(fine)}
                 />
-              )}
-
-              {currentPage === 'reports' && (
-                <Reports fines={fines} students={students} />
               )}
 
               {currentPage === 'settings' && (

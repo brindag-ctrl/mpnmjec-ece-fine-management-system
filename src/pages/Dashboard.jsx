@@ -52,7 +52,7 @@ export const Dashboard = ({
             className="flex items-center gap-2 px-4 py-2.5 bg-red-700 hover:bg-red-800 text-white text-xs font-semibold rounded-xl shadow-md shadow-red-700/20 transition-all active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Add Fine Record</span>
+            <span>Add Fine Record</span>
           </button>
         </div>
       </div>

@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   Users, 
   Receipt, 
-  BarChart3, 
   Settings, 
   LogOut, 
   ShieldCheck,
@@ -19,7 +18,6 @@ export const Sidebar = ({ currentPage, onNavigate, mobileOpen, onCloseMobile }) 
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'students', label: 'Students', icon: Users },
     { id: 'fines', label: 'Fine Management', icon: Receipt },
-    { id: 'reports', label: 'Reports & Audit', icon: BarChart3 },
     { id: 'settings', label: 'Settings', icon: Settings },
   ];
 

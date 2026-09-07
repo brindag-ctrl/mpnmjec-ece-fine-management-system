@@ -57,7 +57,7 @@ export const Header = ({ onOpenMobileMenu, onOpenAddFine, onOpenAddStudent }) =>
             className="flex items-center gap-1.5 px-3.5 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-red-700 to-red-600 hover:from-red-800 hover:to-red-700 rounded-xl shadow-md shadow-red-700/20 transition-all duration-150 active:scale-95"
           >
             <Plus className="w-4 h-4" />
-            <span>+ Add Fine</span>
+            <span>Add Fine</span>
           </button>
         </div>
       </div>

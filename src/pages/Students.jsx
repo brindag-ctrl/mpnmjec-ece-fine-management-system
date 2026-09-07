@@ -106,7 +106,7 @@ export const Students = ({
           className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-500/20 transition-all self-start sm:self-auto"
         >
           <UserPlus className="w-4 h-4" />
-          <span>+ Register Student</span>
+          <span>Register Student</span>
         </button>
       </div>
 
