@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { X, Search, CheckCircle, AlertCircle, Sparkles, Filter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { X, Search, CheckCircle, AlertCircle, ChevronDown, Check, User } from 'lucide-react';
 import { FINE_REASONS } from '../services/mockData';
 import confetti from 'canvas-confetti';
 
@@ -13,7 +13,7 @@ export const AddFineModal = ({
 }) => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
-  const [yearFilter, setYearFilter] = useState('All');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const [reason, setReason] = useState('');
   const [amount, setAmount] = useState('100');
@@ -22,12 +22,14 @@ export const AddFineModal = ({
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  const dropdownRef = useRef(null);
+
   // Initialize modal state on open
   useEffect(() => {
     if (isOpen) {
       setError('');
       setSearchTerm('');
-      setYearFilter('All');
+      setIsDropdownOpen(false);
 
       if (initialData) {
         setSelectedStudentId(initialData.studentId || '');
@@ -38,7 +40,7 @@ export const AddFineModal = ({
       } else {
         const initId = defaultStudentId || (students.length > 0 ? students[0].id : '');
         setSelectedStudentId(initId);
-        setReason(FINE_REASONS[0] || 'Late submission of Lab Observation / Record');
+        setReason('');
         setAmount('100');
         setStatus('Unpaid');
         setRemarks('');
@@ -53,20 +55,24 @@ export const AddFineModal = ({
     }
   }, [isOpen, students, selectedStudentId, defaultStudentId]);
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   if (!isOpen) return null;
 
-  // Filter students based on year filter AND search term
+  // Filter students based on search term
   const filteredStudents = students.filter((s) => {
-    const sYear = (s.year || '').toLowerCase();
-    const matchesYear =
-      yearFilter === 'All' ||
-      sYear === yearFilter.toLowerCase() ||
-      sYear.includes(yearFilter.toLowerCase());
-
-    if (!matchesYear) return false;
-
     if (!searchTerm.trim()) return true;
     const term = searchTerm.toLowerCase().trim();
+    const sYear = (s.year || '').toLowerCase();
     return (
       (s.name || '').toLowerCase().includes(term) ||
       (s.registerNumber || '').toLowerCase().includes(term) ||
@@ -75,46 +81,13 @@ export const AddFineModal = ({
     );
   });
 
-  // Handle Search Input Change & automatically sync selectedStudentId
-  const handleSearchChange = (term, newYearFilter = yearFilter) => {
-    setSearchTerm(term);
-
-    const lower = term.toLowerCase().trim();
-    const matched = students.filter((s) => {
-      const sYear = (s.year || '').toLowerCase();
-      const matchesYear =
-        newYearFilter === 'All' ||
-        (newYearFilter === 'Passed Out'
-          ? sYear.includes('passout') || sYear.includes('passed out')
-          : sYear === newYearFilter.toLowerCase() || sYear.includes(newYearFilter.toLowerCase()));
-
-      if (!matchesYear) return false;
-      if (!lower) return true;
-
-      return (
-        (s.name || '').toLowerCase().includes(lower) ||
-        (s.registerNumber || '').toLowerCase().includes(lower) ||
-        sYear.includes(lower) ||
-        `${sYear} year`.includes(lower)
-      );
-    });
-
-    // Auto-select the top matching student so dropdown, state, and pill stay 100% in sync
-    if (matched.length > 0 && !matched.some((s) => s.id === selectedStudentId)) {
-      setSelectedStudentId(matched[0].id);
-    }
-  };
-
-  const handleYearFilterChange = (yr) => {
-    setYearFilter(yr);
-    handleSearchChange(searchTerm, yr);
-  };
-
-  const handleSelectStudentChange = (e) => {
-    setSelectedStudentId(e.target.value);
-  };
-
   const selectedStudent = students.find((s) => s.id === selectedStudentId);
+
+  const handleSelectStudent = (student) => {
+    setSelectedStudentId(student.id);
+    setSearchTerm('');
+    setIsDropdownOpen(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -175,7 +148,7 @@ export const AddFineModal = ({
         {/* Modal Header */}
         <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-red-700">
               Department Fine Desk
             </span>
             <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
@@ -200,88 +173,137 @@ export const AddFineModal = ({
             </div>
           )}
 
-          {/* Student Selector */}
+          {/* Single Merged Searchable Student Selector */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Select Student (ECE) <span className="text-rose-500">*</span>
-              </label>
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+              Select Student (ECE) <span className="text-rose-500">*</span>
+            </label>
 
-              {/* Quick Year Filter Chips */}
-              {!initialData && (
-                <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                  {['All', '2nd', '3rd', '4th', 'Passed Out', 'Discontinued'].map((yr) => (
+            {/* Merged Searchable Input & Dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <div
+                onClick={() => !initialData && setIsDropdownOpen(true)}
+                className={`w-full flex items-center justify-between px-3.5 py-2.5 bg-white border rounded-xl cursor-pointer transition-all ${
+                  isDropdownOpen
+                    ? 'border-red-600 ring-2 ring-red-600/20'
+                    : 'border-slate-300 hover:border-slate-400'
+                } ${initialData ? 'bg-slate-100 cursor-not-allowed opacity-80' : ''}`}
+              >
+                <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                  <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                  {isDropdownOpen ? (
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Type student name, register number (731724...), or year..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full text-xs sm:text-sm bg-transparent border-none outline-none text-slate-900 placeholder-slate-400 font-medium p-0"
+                    />
+                  ) : (
+                    <div className="truncate text-xs sm:text-sm text-slate-900 font-semibold">
+                      {selectedStudent ? (
+                        <span>
+                          {selectedStudent.name}{' '}
+                          <span className="font-mono text-red-700 font-bold">({selectedStudent.registerNumber})</span>
+                          {' — '}
+                          <span className="text-slate-500 font-normal">
+                            {(selectedStudent.year || '').toLowerCase().includes('passout') 
+                              ? selectedStudent.year 
+                              : `${selectedStudent.year} Year`}
+                          </span>
+                        </span>
+                      ) : (
+                        <span className="text-slate-400 font-normal">-- Click to Search / Select ECE Student --</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-1 shrink-0 ml-2">
+                  {searchTerm && (
                     <button
-                      key={yr}
                       type="button"
-                      onClick={() => handleYearFilterChange(yr)}
-                      className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
-                        yearFilter === yr
-                          ? yr === 'Passed Out'
-                            ? 'bg-purple-600 text-white shadow-2xs'
-                            : yr === 'Discontinued'
-                            ? 'bg-amber-600 text-white shadow-2xs'
-                            : 'bg-blue-600 text-white shadow-2xs'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSearchTerm('');
+                      }}
+                      className="p-1 text-slate-400 hover:text-slate-600 rounded-md"
                     >
-                      {yr === 'All' ? 'All' : yr === 'Passed Out' ? 'Passed Out' : yr === 'Discontinued' ? 'Discontinued' : `${yr} Yr`}
+                      <X className="w-3.5 h-3.5" />
                     </button>
-                  ))}
+                  )}
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isDropdownOpen ? 'rotate-180 text-red-700' : ''}`} />
+                </div>
+              </div>
+
+              {/* Dropdown Floating Menu */}
+              {isDropdownOpen && !initialData && (
+                <div className="absolute top-full left-0 right-0 mt-1.5 max-h-64 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-50 divide-y divide-slate-100">
+                  {filteredStudents.length === 0 ? (
+                    <div className="p-4 text-center text-xs text-slate-400">
+                      No students found matching <strong className="text-slate-700">"{searchTerm}"</strong>.
+                    </div>
+                  ) : (
+                    filteredStudents.map((s) => {
+                      const isSelected = s.id === selectedStudentId;
+                      const sYrLower = (s.year || '').toLowerCase();
+                      const isPassout = sYrLower.includes('passout') || sYrLower.includes('passed out');
+                      const isDisc = sYrLower === 'discontinued';
+
+                      return (
+                        <div
+                          key={s.id}
+                          onClick={() => handleSelectStudent(s)}
+                          className={`p-3 flex items-center justify-between hover:bg-slate-50 cursor-pointer transition-colors text-xs ${
+                            isSelected ? 'bg-red-50/70 font-semibold' : ''
+                          }`}
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{s.name}</span>
+                              <span className="font-mono text-red-700 font-bold text-[11px] bg-red-50 px-1.5 py-0.5 rounded border border-red-200">
+                                {s.registerNumber}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-2">
+                              <span>Department: <strong className="text-slate-700 font-medium">ECE</strong></span>
+                              <span>•</span>
+                              <span>Year: <strong className="text-slate-700 font-medium">{isPassout ? s.year : isDisc ? 'Discontinued' : `${s.year} Year`}</strong></span>
+                            </div>
+                          </div>
+
+                          <div className="shrink-0 ml-3 flex items-center gap-2">
+                            <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${
+                              isPassout
+                                ? 'bg-purple-50 text-purple-700 border-purple-200'
+                                : isDisc
+                                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                                : 'bg-slate-100 text-slate-700 border-slate-200'
+                            }`}>
+                              {isPassout ? 'Passout' : `${s.year} Yr`}
+                            </span>
+                            {isSelected && <Check className="w-4 h-4 text-red-700" />}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               )}
             </div>
-
-            {/* Filter Search Input */}
-            {!initialData && (
-              <div className="relative mb-2">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  placeholder="Filter student by name, register number (e.g. 731724...), or year..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
-                />
-              </div>
-            )}
-
-            {/* Dropdown Select */}
-            <select
-              value={selectedStudentId}
-              onChange={handleSelectStudentChange}
-              disabled={!!initialData}
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 font-medium"
-            >
-              <option value="" disabled>-- Select ECE Student --</option>
-              {filteredStudents.length === 0 ? (
-                <option value="" disabled>No student matches current filter</option>
-              ) : (
-                filteredStudents.map((s) => {
-                  const sYrLower = (s.year || '').toLowerCase();
-                  const isPassout = sYrLower.includes('passout') || sYrLower.includes('passed out');
-                  const isDisc = sYrLower === 'discontinued';
-                  const yrLabel = isPassout ? (s.year.startsWith('Passout-') ? s.year : `Passout ${s.year}`) : isDisc ? 'Discontinued' : `${s.year} Year ECE`;
-
-                  return (
-                    <option key={s.id} value={s.id}>
-                      {s.name} ({s.registerNumber}) - {yrLabel}
-                    </option>
-                  );
-                })
-              )}
-            </select>
           </div>
 
           {/* Selected Student Pill */}
           {selectedStudent && (
-            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-700 animate-in fade-in duration-150">
+            <div className="p-3 rounded-xl bg-red-50 border border-red-200 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-700 animate-in fade-in duration-150">
               <div className="flex items-center gap-2">
                 <span className="text-slate-500">Selected: </span>
                 <strong className="text-slate-900 font-bold">{selectedStudent.name}</strong>
                 <span className="text-slate-300">|</span>
                 <span className="text-slate-500">Reg: </span>
-                <strong className="text-blue-900 font-mono">{selectedStudent.registerNumber}</strong>
+                <strong className="text-red-700 font-mono font-bold">{selectedStudent.registerNumber}</strong>
               </div>
               <div className="flex items-center gap-3">
                 <div>
@@ -295,45 +317,39 @@ export const AddFineModal = ({
                       Discontinued
                     </span>
                   ) : (
-                    <span className="font-semibold text-blue-800 bg-blue-100/60 px-1.5 py-0.5 rounded">
+                    <span className="font-semibold text-slate-800 bg-white px-2 py-0.5 rounded border border-slate-200">
                       {selectedStudent.year} Year
                     </span>
                   )}
                 </div>
                 <div>
                   <span className="text-slate-500">Dept: </span>
-                  <span className="text-blue-700 font-bold">ECE</span>
+                  <span className="text-red-700 font-bold">ECE</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* Reason Input (Typable with Datalist Suggestions) */}
+          {/* Plain Text Fine Reason Input */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Fine Reason <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
-              list="fine-reasons-datalist"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Type fine reason (e.g. Late submission of Lab Record, Mobile phone in class...)"
+              placeholder="Enter reason for fine (e.g. Incomplete observation, Late submission...)"
               required
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20 font-medium"
             />
-            <datalist id="fine-reasons-datalist">
-              {FINE_REASONS.map((r) => (
-                <option key={r} value={r} />
-              ))}
-            </datalist>
           </div>
 
           {/* Amount & Status Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Amount */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Fine Amount (₹ INR) <span className="text-rose-500">*</span>
               </label>
               <div className="relative">
@@ -344,22 +360,22 @@ export const AddFineModal = ({
                   step="1"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="e.g. 150"
+                  placeholder="e.g. 100"
                   required
-                  className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 font-mono font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                  className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 font-mono font-bold focus:outline-none focus:border-red-600 focus:ring-2 focus:ring-red-600/20"
                 />
               </div>
             </div>
 
             {/* Status */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Payment Status <span className="text-rose-500">*</span>
               </label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
-                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 ${
+                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-xs sm:text-sm font-bold focus:outline-none focus:ring-2 ${
                   status === 'Paid'
                     ? 'border-emerald-500 text-emerald-700 focus:ring-emerald-100'
                     : status === 'Unpaid'
@@ -376,7 +392,7 @@ export const AddFineModal = ({
 
           {/* Remarks */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Staff Remarks / Faculty In-Charge (Optional)
             </label>
             <input
@@ -384,7 +400,7 @@ export const AddFineModal = ({
               placeholder="e.g. Issued by DSP Lab In-charge / Paid via Cash Desk"
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
-              className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600"
+              className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-red-600"
             />
           </div>
 
@@ -393,14 +409,14 @@ export const AddFineModal = ({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors"
+              className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-5 py-2.5 text-xs sm:text-sm font-bold text-white bg-red-700 hover:bg-red-800 rounded-xl shadow-md shadow-red-700/20 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
             >
               {submitting ? 'Saving...' : initialData ? 'Update Fine' : 'Record Fine'}
             </button>
