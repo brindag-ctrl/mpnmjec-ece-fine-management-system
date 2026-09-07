@@ -48,7 +48,6 @@ export const Sidebar = ({ currentPage, onNavigate, mobileOpen, onCloseMobile }) 
                 <span className="text-[10px] font-bold uppercase tracking-wider text-red-700 bg-red-50 px-2 py-0.5 rounded border border-red-200">
                   ECE DEPT
                 </span>
-                <span className="text-[10px] text-slate-400 font-mono">v2.4</span>
               </div>
               <h1 className="text-sm font-bold text-slate-900 tracking-tight truncate mt-0.5">
                 Fine Management

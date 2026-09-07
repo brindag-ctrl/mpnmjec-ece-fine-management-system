@@ -339,19 +339,293 @@ export const OFFICIAL_LEDGER_4TH_YEAR_FINES = [
   },
 ];
 
+export const OFFICIAL_LEDGER_PASSOUT_2026_FINES = [
+  {
+    id: 'fine_ledger_passout2026_01',
+    studentId: 'std_ece_731722106014',
+    studentName: 'KATHIRAVAN M',
+    registerNumber: '731722106014',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_02',
+    studentId: 'std_ece_731722106016',
+    studentName: 'KAVINKUMAR S',
+    registerNumber: '731722106016',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_03',
+    studentId: 'std_ece_731722106036',
+    studentName: 'SAMEEN AFROSE M',
+    registerNumber: '731722106036',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_04',
+    studentId: 'std_ece_731722106038',
+    studentName: 'SARAN .N',
+    registerNumber: '731722106038',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_05',
+    studentId: 'std_ece_731722106014',
+    studentName: 'KATHIRAVAN M',
+    registerNumber: '731722106014',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 40,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_06',
+    studentId: 'std_ece_731722106004',
+    studentName: 'CHANDRU S',
+    registerNumber: '731722106004',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_07',
+    studentId: 'std_ece_731722106005',
+    studentName: 'DEEPAK I',
+    registerNumber: '731722106005',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_08',
+    studentId: 'std_ece_731722106001',
+    studentName: 'AJAY T',
+    registerNumber: '731722106001',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_09',
+    studentId: 'std_ece_731722106020',
+    studentName: 'MEIYARASAN R',
+    registerNumber: '731722106020',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 40,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_10',
+    studentId: 'std_ece_731722106016',
+    studentName: 'KAVINKUMAR S',
+    registerNumber: '731722106016',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 40,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_11',
+    studentId: 'std_ece_731722106019',
+    studentName: 'MANIKANDAN A',
+    registerNumber: '731722106019',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_12',
+    studentId: 'std_ece_731722106010',
+    studentName: 'GNANA PRAKASH A',
+    registerNumber: '731722106010',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_13',
+    studentId: 'std_ece_731722106033',
+    studentName: 'RITHIKA S',
+    registerNumber: '731722106033',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_14',
+    studentId: 'std_ece_731722106036',
+    studentName: 'SAMEEN AFROSE M',
+    registerNumber: '731722106036',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_15',
+    studentId: 'std_ece_731722106012',
+    studentName: 'KANIMOZHI V',
+    registerNumber: '731722106012',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_16',
+    studentId: 'std_ece_731722106024',
+    studentName: 'MYTHILI R',
+    registerNumber: '731722106024',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Unpaid',
+    remarks: 'Pending in ledger sheet',
+    paidAt: null,
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_17',
+    studentId: 'std_ece_731722106034',
+    studentName: 'RITHIKA SHREE Y',
+    registerNumber: '731722106034',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_18',
+    studentId: 'std_ece_731722106013',
+    studentName: 'KARTHIKA M',
+    registerNumber: '731722106013',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+  {
+    id: 'fine_ledger_passout2026_19',
+    studentId: 'std_ece_731722106006',
+    studentName: 'DEVADHARSHINI M L',
+    registerNumber: '731722106006',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'Not wearing shoe',
+    amount: 20,
+    status: 'Paid',
+    remarks: 'Signed in ledger sheet',
+    paidAt: '2025-09-29T10:00:00.000Z',
+    createdAt: '2025-09-29T10:00:00.000Z',
+  },
+];
+
+export const ALL_OFFICIAL_LEDGER_FINES = [
+  ...OFFICIAL_LEDGER_4TH_YEAR_FINES,
+  ...OFFICIAL_LEDGER_PASSOUT_2026_FINES,
+];
+
 export const fineService = {
   /**
-   * Sync official ledger fines to Cloud Firestore
+   * Sync all official ledger fines to Cloud Firestore
    */
   syncLedgerFinesToFirestore: async () => {
     if (!isFirebaseConfigured() || !db) {
       throw new Error('Firebase Cloud Firestore is not configured.');
     }
 
-    console.log(`⚡ Syncing ${OFFICIAL_LEDGER_4TH_YEAR_FINES.length} 4th Year Ledger Fines to Firestore...`);
+    console.log(`⚡ Syncing ${ALL_OFFICIAL_LEDGER_FINES.length} Ledger Fines to Firestore...`);
     const syncedList = [];
 
-    for (const fine of OFFICIAL_LEDGER_4TH_YEAR_FINES) {
+    for (const fine of ALL_OFFICIAL_LEDGER_FINES) {
       const docRef = doc(db, 'fines', fine.id);
       const payload = {
         studentId: fine.studentId,
@@ -373,7 +647,7 @@ export const fineService = {
       syncedList.push({ id: fine.id, ...payload });
     }
 
-    console.log('✅ Successfully synced 4th Year ledger fines to Firestore!');
+    console.log(`✅ Successfully synced all ${ALL_OFFICIAL_LEDGER_FINES.length} ledger fines to Firestore!`);
     return syncedList;
   },
 
@@ -401,10 +675,10 @@ export const fineService = {
 
     // Auto-sync missing ledger fines to Firestore
     const existingFineIds = new Set(fines.map((f) => f.id));
-    const missingFines = OFFICIAL_LEDGER_4TH_YEAR_FINES.filter((f) => !existingFineIds.has(f.id));
+    const missingFines = ALL_OFFICIAL_LEDGER_FINES.filter((f) => !existingFineIds.has(f.id));
 
     if (missingFines.length > 0) {
-      console.log(`⚡ Auto-syncing ${missingFines.length} 4th Year ledger fines directly into Cloud Firestore...`);
+      console.log(`⚡ Auto-syncing ${missingFines.length} ledger fines directly into Cloud Firestore...`);
       for (const fine of missingFines) {
         const docRef = doc(db, 'fines', fine.id);
         const payload = {

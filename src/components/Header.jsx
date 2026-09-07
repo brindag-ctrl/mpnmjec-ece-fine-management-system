@@ -31,10 +31,8 @@ export const Header = ({ onOpenMobileMenu, onOpenAddFine, onOpenAddStudent }) =>
                   Chennimalai
                 </span>
               </div>
-              <p className="text-xs text-red-700 font-bold tracking-wide mt-0.5 flex items-center gap-2 truncate">
-                <span>Department of Electronics and Communication Engineering (ECE)</span>
-                <span className="hidden md:inline-block text-slate-300">•</span>
-                <span className="hidden md:inline-block text-slate-500 font-mono text-[11px]">Academic Year 2025–2026</span>
+              <p className="text-xs text-red-700 font-bold tracking-wide mt-0.5 truncate">
+                Department of Electronics and Communication Engineering (ECE)
               </p>
             </div>
           </div>
