@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { X, Search, CheckCircle, AlertCircle, User, Check, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { X, Search, CheckCircle, AlertCircle, Sparkles, Filter } from 'lucide-react';
 import { FINE_REASONS } from '../services/mockData';
 import confetti from 'canvas-confetti';
 
@@ -12,8 +12,8 @@ export const AddFineModal = ({
   defaultStudentId = null,
 }) => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [yearFilter, setYearFilter] = useState('All');
 
   const [reason, setReason] = useState('');
   const [amount, setAmount] = useState('100');
@@ -22,14 +22,12 @@ export const AddFineModal = ({
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  const dropdownRef = useRef(null);
-
-  // Initialize modal state ONLY when modal opens or initial/default data changes
+  // Initialize modal state on open
   useEffect(() => {
     if (isOpen) {
       setError('');
-      setSearchQuery('');
-      setIsDropdownOpen(false);
+      setSearchTerm('');
+      setYearFilter('All');
 
       if (initialData) {
         setSelectedStudentId(initialData.studentId || '');
@@ -48,50 +46,87 @@ export const AddFineModal = ({
     }
   }, [isOpen, initialData, defaultStudentId]);
 
-  // Close dropdown on outside click
+  // If students load after modal open, ensure initial student is selected
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsDropdownOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+    if (isOpen && !selectedStudentId && students.length > 0) {
+      setSelectedStudentId(defaultStudentId || students[0].id);
+    }
+  }, [isOpen, students, selectedStudentId, defaultStudentId]);
 
   if (!isOpen) return null;
 
-  const selectedStudent = students.find((s) => s.id === selectedStudentId);
-
-  // Filter students based on search input
+  // Filter students based on year filter AND search term
   const filteredStudents = students.filter((s) => {
-    if (!searchQuery.trim()) return true;
-    const term = searchQuery.toLowerCase().trim();
+    const sYear = (s.year || '').toLowerCase();
+    const matchesYear =
+      yearFilter === 'All' ||
+      sYear === yearFilter.toLowerCase() ||
+      sYear.includes(yearFilter.toLowerCase());
+
+    if (!matchesYear) return false;
+
+    if (!searchTerm.trim()) return true;
+    const term = searchTerm.toLowerCase().trim();
     return (
-      s.name.toLowerCase().includes(term) ||
-      s.registerNumber.toLowerCase().includes(term) ||
-      (s.year && s.year.toLowerCase().includes(term))
+      (s.name || '').toLowerCase().includes(term) ||
+      (s.registerNumber || '').toLowerCase().includes(term) ||
+      sYear.includes(term) ||
+      `${sYear} year`.includes(term)
     );
   });
 
-  const handleSelectStudent = (studentId) => {
-    setSelectedStudentId(studentId);
-    setIsDropdownOpen(false);
-    setSearchQuery('');
+  // Handle Search Input Change & automatically sync selectedStudentId
+  const handleSearchChange = (term, newYearFilter = yearFilter) => {
+    setSearchTerm(term);
+
+    const lower = term.toLowerCase().trim();
+    const matched = students.filter((s) => {
+      const sYear = (s.year || '').toLowerCase();
+      const matchesYear =
+        newYearFilter === 'All' ||
+        sYear === newYearFilter.toLowerCase() ||
+        sYear.includes(newYearFilter.toLowerCase());
+
+      if (!matchesYear) return false;
+      if (!lower) return true;
+
+      return (
+        (s.name || '').toLowerCase().includes(lower) ||
+        (s.registerNumber || '').toLowerCase().includes(lower) ||
+        sYear.includes(lower) ||
+        `${sYear} year`.includes(lower)
+      );
+    });
+
+    // Auto-select the top matching student so dropdown, state, and pill stay 100% in sync
+    if (matched.length > 0 && !matched.some((s) => s.id === selectedStudentId)) {
+      setSelectedStudentId(matched[0].id);
+    }
   };
+
+  const handleYearFilterChange = (yr) => {
+    setYearFilter(yr);
+    handleSearchChange(searchTerm, yr);
+  };
+
+  const handleSelectStudentChange = (e) => {
+    setSelectedStudentId(e.target.value);
+  };
+
+  const selectedStudent = students.find((s) => s.id === selectedStudentId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     if (!selectedStudent) {
-      setError('Please select a valid ECE student.');
+      setError('Please select an active ECE student.');
       return;
     }
 
     const finalReason = reason.trim();
     if (!finalReason) {
-      setError('Please enter or select a fine reason.');
+      setError('Please enter or select a reason for the fine.');
       return;
     }
 
@@ -164,100 +199,92 @@ export const AddFineModal = ({
             </div>
           )}
 
-          {/* Searchable Student Combobox */}
-          <div ref={dropdownRef} className="relative">
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Select ECE Student <span className="text-rose-500">*</span>
-            </label>
+          {/* Student Selector */}
+          <div>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Select Student (ECE) <span className="text-rose-500">*</span>
+              </label>
 
-            {/* Selected Student Card */}
-            {selectedStudent && !isDropdownOpen ? (
-              <div className="p-3.5 rounded-xl bg-blue-50 border border-blue-200 flex items-center justify-between gap-3 text-xs">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-lg bg-blue-600 text-white font-bold flex items-center justify-center text-sm font-mono shrink-0">
-                    {selectedStudent.name.charAt(0)}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-slate-900 text-sm">{selectedStudent.name}</span>
-                      <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                        {selectedStudent.year} Year ECE
-                      </span>
-                    </div>
-                    <p className="text-slate-600 font-mono text-[11px] mt-0.5">
-                      Reg No: <strong className="text-blue-900">{selectedStudent.registerNumber}</strong>
-                    </p>
-                  </div>
+              {/* Quick Year Filter Chips */}
+              {!initialData && (
+                <div className="flex items-center gap-1 text-[11px]">
+                  {['All', '2nd', '3rd', '4th'].map((yr) => (
+                    <button
+                      key={yr}
+                      type="button"
+                      onClick={() => handleYearFilterChange(yr)}
+                      className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
+                        yearFilter === yr
+                          ? 'bg-blue-600 text-white shadow-2xs'
+                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                      }`}
+                    >
+                      {yr === 'All' ? 'All' : `${yr} Yr`}
+                    </button>
+                  ))}
                 </div>
+              )}
+            </div>
 
-                {!initialData && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsDropdownOpen(true);
-                      setSearchQuery('');
-                    }}
-                    className="px-3 py-1.5 text-xs font-semibold text-blue-700 bg-white hover:bg-blue-100 border border-blue-300 rounded-lg transition-colors shadow-2xs"
-                  >
-                    Change Student
-                  </button>
-                )}
-              </div>
-            ) : (
-              /* Search Input Field */
-              <div className="relative">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
+            {/* Filter Search Input */}
+            {!initialData && (
+              <div className="relative mb-2">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
                 <input
                   type="text"
-                  placeholder="Search student by name, register number (e.g. 731725...), or year..."
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setIsDropdownOpen(true);
-                  }}
-                  onFocus={() => setIsDropdownOpen(true)}
-                  disabled={!!initialData}
-                  className="w-full pl-10 pr-9 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Filter student by name, register number (e.g. 731724...), or year..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearchChange(e.target.value)}
+                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
                 />
-                <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none" />
-
-                {/* Dropdown Options Popup */}
-                {isDropdownOpen && (
-                  <div className="absolute left-0 right-0 top-full mt-1 max-h-60 overflow-y-auto bg-white border border-slate-200 rounded-xl shadow-xl z-50 divide-y divide-slate-100">
-                    {filteredStudents.length === 0 ? (
-                      <div className="p-4 text-center text-slate-400 text-xs">
-                        No ECE student found matching "{searchQuery}".
-                      </div>
-                    ) : (
-                      filteredStudents.map((s) => {
-                        const isSelected = s.id === selectedStudentId;
-                        return (
-                          <div
-                            key={s.id}
-                            onClick={() => handleSelectStudent(s.id)}
-                            className={`p-3 text-xs flex items-center justify-between cursor-pointer transition-colors ${
-                              isSelected ? 'bg-blue-50 text-blue-900' : 'hover:bg-slate-50 text-slate-800'
-                            }`}
-                          >
-                            <div>
-                              <p className="font-bold text-slate-900 text-xs sm:text-sm">{s.name}</p>
-                              <p className="text-[11px] font-mono text-slate-500 mt-0.5">
-                                Reg No: <span className="text-blue-700 font-semibold">{s.registerNumber}</span> • {s.year} Year ECE
-                              </p>
-                            </div>
-
-                            {isSelected && (
-                              <Check className="w-4 h-4 text-blue-600 shrink-0" />
-                            )}
-                          </div>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
               </div>
             )}
+
+            {/* Dropdown Select */}
+            <select
+              value={selectedStudentId}
+              onChange={handleSelectStudentChange}
+              disabled={!!initialData}
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 font-medium"
+            >
+              <option value="" disabled>-- Select ECE Student --</option>
+              {filteredStudents.length === 0 ? (
+                <option value="" disabled>No student matches current filter</option>
+              ) : (
+                filteredStudents.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name} ({s.registerNumber}) - {s.year} Year ECE
+                  </option>
+                ))
+              )}
+            </select>
           </div>
+
+          {/* Selected Student Pill */}
+          {selectedStudent && (
+            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-700 animate-in fade-in duration-150">
+              <div className="flex items-center gap-2">
+                <span className="text-slate-500">Selected: </span>
+                <strong className="text-slate-900 font-bold">{selectedStudent.name}</strong>
+                <span className="text-slate-300">|</span>
+                <span className="text-slate-500">Reg: </span>
+                <strong className="text-blue-900 font-mono">{selectedStudent.registerNumber}</strong>
+              </div>
+              <div className="flex items-center gap-3">
+                <div>
+                  <span className="text-slate-500">Year: </span>
+                  <span className="font-semibold text-blue-800 bg-blue-100/60 px-1.5 py-0.5 rounded">
+                    {selectedStudent.year} Year
+                  </span>
+                </div>
+                <div>
+                  <span className="text-slate-500">Dept: </span>
+                  <span className="text-blue-700 font-bold">ECE</span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Reason Input (Typable with Datalist Suggestions) */}
           <div>
