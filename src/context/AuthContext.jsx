@@ -15,30 +15,24 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Check local storage persistence first
-    try {
-      const savedUser = localStorage.getItem(LOCAL_STORAGE_AUTH_KEY);
-      if (savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
-    } catch {
-      // Ignore
-    }
-
-    // If live Firebase auth is active, listen to state changes
+    // If live Firebase auth is active, listen directly to Firebase state changes
     if (isFirebaseConfigured() && auth) {
       const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
         if (firebaseUser) {
+          const nameFromEmail = firebaseUser.email ? firebaseUser.email.split('@')[0].toUpperCase() : 'ECE Staff';
           const authData = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
-            displayName: firebaseUser.displayName || 'ECE Department Faculty',
+            displayName: firebaseUser.displayName || `${nameFromEmail} (ECE Faculty)`,
             role: 'Department Administrator',
             department: 'Electronics and Communication Engineering',
             college: 'M.P. Nachimuthu M. Jaganathan Engineering College',
           };
           setUser(authData);
           localStorage.setItem(LOCAL_STORAGE_AUTH_KEY, JSON.stringify(authData));
+        } else {
+          setUser(null);
+          localStorage.removeItem(LOCAL_STORAGE_AUTH_KEY);
         }
         setLoading(false);
       });

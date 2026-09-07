@@ -8,88 +8,71 @@ import {
   deleteDoc, 
   query, 
   where, 
+  orderBy,
   serverTimestamp 
 } from 'firebase/firestore';
 import { db, isFirebaseConfigured } from './firebase';
 
-const LOCAL_STORAGE_FINES_KEY = 'mpnmjec_ece_fines_db';
-
-const getLocalFines = () => {
-  try {
-    const raw = localStorage.getItem(LOCAL_STORAGE_FINES_KEY);
-    if (raw) {
-      return JSON.parse(raw);
-    }
-  } catch (err) {
-    console.error('Error accessing local fines:', err);
-  }
-  return [];
-};
-
-const saveLocalFines = (fines) => {
-  try {
-    localStorage.setItem(LOCAL_STORAGE_FINES_KEY, JSON.stringify(fines));
-  } catch (err) {
-    console.error('Error saving local fines:', err);
-  }
-};
-
 export const fineService = {
   /**
-   * Get all live fines directly from Firebase Firestore (with graceful fallback)
+   * Get all live fines directly from Firebase Cloud Firestore
    */
   getAllFines: async () => {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const q = query(collection(db, 'fines'));
-        const querySnapshot = await getDocs(q);
-        const fines = [];
-        querySnapshot.forEach((doc) => {
-          fines.push({ id: doc.id, ...doc.data() });
-        });
-
-        // Sort by createdAt descending
-        fines.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-        saveLocalFines(fines);
-        return fines;
-      } catch (err) {
-        console.warn('Firestore fetch fines notice (using local storage):', err.message);
-        return getLocalFines();
-      }
+    if (!isFirebaseConfigured() || !db) {
+      throw new Error('Firebase Cloud Firestore is not configured.');
     }
-    return getLocalFines();
+
+    const q = query(collection(db, 'fines'));
+    const querySnapshot = await getDocs(q);
+    const fines = [];
+    
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
+      fines.push({
+        id: docSnapshot.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt || new Date().toISOString(),
+      });
+    });
+
+    // Sort by createdAt descending
+    fines.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return fines;
   },
 
   /**
-   * Get fines for a specific student from Firestore
+   * Get fines for a specific student directly from Firestore
    */
   getFinesByStudentId: async (studentId) => {
     if (!studentId) return [];
-
-    if (isFirebaseConfigured() && db) {
-      try {
-        const q = query(
-          collection(db, 'fines'), 
-          where('studentId', '==', studentId)
-        );
-        const querySnapshot = await getDocs(q);
-        const fines = [];
-        querySnapshot.forEach((doc) => {
-          fines.push({ id: doc.id, ...doc.data() });
-        });
-        fines.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
-        return fines;
-      } catch (err) {
-        console.warn('Firestore getFinesByStudentId notice:', err.message);
-      }
+    if (!isFirebaseConfigured() || !db) {
+      throw new Error('Firebase Cloud Firestore is not configured.');
     }
 
-    const localList = getLocalFines();
-    return localList.filter((f) => f.studentId === studentId);
+    const q = query(
+      collection(db, 'fines'), 
+      where('studentId', '==', studentId)
+    );
+    const querySnapshot = await getDocs(q);
+    const fines = [];
+    
+    querySnapshot.forEach((docSnapshot) => {
+      const data = docSnapshot.data();
+      fines.push({
+        id: docSnapshot.id,
+        ...data,
+        createdAt: data.createdAt?.toDate ? data.createdAt.toDate().toISOString() : data.createdAt || new Date().toISOString(),
+        updatedAt: data.updatedAt?.toDate ? data.updatedAt.toDate().toISOString() : data.updatedAt || new Date().toISOString(),
+      });
+    });
+
+    fines.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+    return fines;
   },
 
   /**
-   * Add a new fine directly to Firestore
+   * Add a new fine directly to Firebase Cloud Firestore
    */
   addFine: async (fineData) => {
     const amount = parseFloat(fineData.amount) || 0;
@@ -105,10 +88,14 @@ export const fineService = {
       throw new Error('Fine reason is required.');
     }
 
+    if (!isFirebaseConfigured() || !db) {
+      throw new Error('Firebase Cloud Firestore is not configured.');
+    }
+
     const nowIso = new Date().toISOString();
     const status = fineData.status || 'Unpaid';
 
-    const newFine = {
+    const newFinePayload = {
       studentId: fineData.studentId,
       studentName: fineData.studentName,
       registerNumber: fineData.registerNumber,
@@ -120,38 +107,22 @@ export const fineService = {
       remarks: fineData.remarks ? fineData.remarks.trim() : '',
       paidAt: status === 'Paid' ? nowIso : null,
       cancelledAt: status === 'Cancelled' ? nowIso : null,
+      createdAt: serverTimestamp(),
+      updatedAt: serverTimestamp(),
+    };
+
+    const docRef = await addDoc(collection(db, 'fines'), newFinePayload);
+
+    return {
+      id: docRef.id,
+      ...newFinePayload,
       createdAt: nowIso,
       updatedAt: nowIso,
     };
-
-    let generatedId = 'FINE-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
-
-    if (isFirebaseConfigured() && db) {
-      try {
-        const docRef = await addDoc(collection(db, 'fines'), {
-          ...newFine,
-          createdAt: serverTimestamp(),
-          updatedAt: serverTimestamp(),
-        });
-        generatedId = docRef.id;
-      } catch (err) {
-        console.warn('Firestore add fine permission error:', err.message);
-        if (err.code === 'permission-denied' || err.message.includes('permission')) {
-          throw new Error('Firebase Firestore Rules locked! In Firebase Console > Firestore Database > Rules, set "allow read, write: if true;"');
-        }
-        throw err;
-      }
-    }
-
-    const fineWithId = { id: generatedId, ...newFine };
-    const currentList = getLocalFines();
-    saveLocalFines([fineWithId, ...currentList]);
-
-    return fineWithId;
   },
 
   /**
-   * Update fine details in Firestore
+   * Update fine details in Firebase Cloud Firestore
    */
   updateFine: async (fineId, updatedData) => {
     const amount = parseFloat(updatedData.amount) || 0;
@@ -159,95 +130,62 @@ export const fineService = {
       throw new Error('Fine amount must be greater than 0.');
     }
 
-    const currentList = getLocalFines();
-    const existing = currentList.find((f) => f.id === fineId);
+    if (!isFirebaseConfigured() || !db) {
+      throw new Error('Firebase Cloud Firestore is not configured.');
+    }
 
-    const status = updatedData.status || existing?.status || 'Unpaid';
+    const status = updatedData.status || 'Unpaid';
     const nowIso = new Date().toISOString();
 
     const fieldsToUpdate = {
       reason: updatedData.reason.trim(),
       amount: amount,
       status: status,
-      remarks: updatedData.remarks !== undefined ? updatedData.remarks.trim() : (existing?.remarks || ''),
-      paidAt: status === 'Paid' ? (existing?.paidAt || nowIso) : null,
-      cancelledAt: status === 'Cancelled' ? (existing?.cancelledAt || nowIso) : null,
-      updatedAt: nowIso,
+      remarks: updatedData.remarks !== undefined ? updatedData.remarks.trim() : '',
+      paidAt: status === 'Paid' ? (updatedData.paidAt || nowIso) : null,
+      cancelledAt: status === 'Cancelled' ? (updatedData.cancelledAt || nowIso) : null,
+      updatedAt: serverTimestamp(),
     };
 
-    if (isFirebaseConfigured() && db) {
-      try {
-        const docRef = doc(db, 'fines', fineId);
-        await updateDoc(docRef, {
-          ...fieldsToUpdate,
-          updatedAt: serverTimestamp(),
-        });
-      } catch (err) {
-        console.warn('Firestore update fine notice:', err.message);
-      }
-    }
+    const docRef = doc(db, 'fines', fineId);
+    await updateDoc(docRef, fieldsToUpdate);
 
-    const updatedList = currentList.map((f) =>
-      f.id === fineId ? { ...f, ...fieldsToUpdate } : f
-    );
-    saveLocalFines(updatedList);
-
-    return { id: fineId, ...(existing || {}), ...fieldsToUpdate };
+    return { id: fineId, ...updatedData, ...fieldsToUpdate, updatedAt: nowIso };
   },
 
   /**
-   * Change fine status directly in Firestore
+   * Change fine status directly in Firebase Cloud Firestore
    */
   changeFineStatus: async (fineId, newStatus, remarks = '') => {
-    const currentList = getLocalFines();
-    const existing = currentList.find((f) => f.id === fineId);
+    if (!isFirebaseConfigured() || !db) {
+      throw new Error('Firebase Cloud Firestore is not configured.');
+    }
 
     const nowIso = new Date().toISOString();
     const updates = {
       status: newStatus,
       paidAt: newStatus === 'Paid' ? nowIso : null,
       cancelledAt: newStatus === 'Cancelled' ? nowIso : null,
-      remarks: remarks || existing?.remarks || '',
-      updatedAt: nowIso,
+      remarks: remarks || '',
+      updatedAt: serverTimestamp(),
     };
 
-    if (isFirebaseConfigured() && db) {
-      try {
-        const docRef = doc(db, 'fines', fineId);
-        await updateDoc(docRef, {
-          ...updates,
-          updatedAt: serverTimestamp(),
-        });
-      } catch (err) {
-        console.warn('Firestore change status notice:', err.message);
-      }
-    }
+    const docRef = doc(db, 'fines', fineId);
+    await updateDoc(docRef, updates);
 
-    const updatedList = currentList.map((f) =>
-      f.id === fineId ? { ...f, ...updates } : f
-    );
-    saveLocalFines(updatedList);
-
-    return { id: fineId, ...(existing || {}), ...updates };
+    return { id: fineId, ...updates, updatedAt: nowIso };
   },
 
   /**
-   * Delete fine record directly from Firestore
+   * Delete fine record directly from Firebase Cloud Firestore
    */
   deleteFine: async (fineId) => {
-    if (isFirebaseConfigured() && db) {
-      try {
-        const docRef = doc(db, 'fines', fineId);
-        await deleteDoc(docRef);
-      } catch (err) {
-        console.warn('Firestore delete fine notice:', err.message);
-      }
+    if (!isFirebaseConfigured() || !db) {
+      throw new Error('Firebase Cloud Firestore is not configured.');
     }
 
-    const currentList = getLocalFines();
-    const filteredList = currentList.filter((f) => f.id !== fineId);
-    saveLocalFines(filteredList);
-
+    const docRef = doc(db, 'fines', fineId);
+    await deleteDoc(docRef);
     return true;
   },
 };
