@@ -1,7 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import { X, Search, CheckCircle, AlertCircle, Sparkles, Filter } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  X, 
+  Search, 
+  CheckCircle2, 
+  AlertCircle, 
+  User, 
+  Check, 
+  ChevronDown, 
+  IndianRupee, 
+  Tag, 
+  Clock, 
+  RotateCcw,
+  Sparkles
+} from 'lucide-react';
 import { FINE_REASONS } from '../services/mockData';
 import confetti from 'canvas-confetti';
+
+const QUICK_FINE_PRESETS = [
+  { label: 'Lab Record / Observation Late', amount: 100, tag: 'Lab Record' },
+  { label: 'Electronic Component / Equipment Damage', amount: 200, tag: 'Component Damage' },
+  { label: 'Missing ID Tag / Improper Lab Attire', amount: 50, tag: 'ID / Attire' },
+  { label: 'Mobile Phone in Lab / Class', amount: 100, tag: 'Mobile Phone' },
+  { label: 'Department Library Book Overdue', amount: 50, tag: 'Library Overdue' },
+  { label: 'Late to Lab / Bench Discipline', amount: 50, tag: 'Late / Discipline' },
+];
+
+const QUICK_AMOUNTS = [50, 100, 150, 200, 500];
 
 export const AddFineModal = ({
   isOpen,
@@ -12,6 +36,7 @@ export const AddFineModal = ({
   defaultStudentId = null,
 }) => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [isSearchingStudent, setIsSearchingStudent] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState('All');
 
@@ -21,6 +46,8 @@ export const AddFineModal = ({
   const [remarks, setRemarks] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
+
+  const searchInputRef = useRef(null);
 
   // Initialize modal state on open
   useEffect(() => {
@@ -35,6 +62,7 @@ export const AddFineModal = ({
         setAmount(initialData.amount ? String(initialData.amount) : '100');
         setStatus(initialData.status || 'Unpaid');
         setRemarks(initialData.remarks || '');
+        setIsSearchingStudent(false);
       } else {
         const initId = defaultStudentId || (students.length > 0 ? students[0].id : '');
         setSelectedStudentId(initId);
@@ -42,11 +70,12 @@ export const AddFineModal = ({
         setAmount('100');
         setStatus('Unpaid');
         setRemarks('');
+        setIsSearchingStudent(!defaultStudentId && students.length === 0);
       }
     }
-  }, [isOpen, initialData, defaultStudentId]);
+  }, [isOpen, initialData, defaultStudentId, students.length]);
 
-  // If students load after modal open, ensure initial student is selected
+  // If students load asynchronously after modal opens, ensure student is selected
   useEffect(() => {
     if (isOpen && !selectedStudentId && students.length > 0) {
       setSelectedStudentId(defaultStudentId || students[0].id);
@@ -54,6 +83,8 @@ export const AddFineModal = ({
   }, [isOpen, students, selectedStudentId, defaultStudentId]);
 
   if (!isOpen) return null;
+
+  const selectedStudent = students.find((s) => s.id === selectedStudentId);
 
   // Filter students based on year filter AND search term
   const filteredStudents = students.filter((s) => {
@@ -75,45 +106,16 @@ export const AddFineModal = ({
     );
   });
 
-  // Handle Search Input Change & automatically sync selectedStudentId
-  const handleSearchChange = (term, newYearFilter = yearFilter) => {
-    setSearchTerm(term);
-
-    const lower = term.toLowerCase().trim();
-    const matched = students.filter((s) => {
-      const sYear = (s.year || '').toLowerCase();
-      const matchesYear =
-        newYearFilter === 'All' ||
-        sYear === newYearFilter.toLowerCase() ||
-        sYear.includes(newYearFilter.toLowerCase());
-
-      if (!matchesYear) return false;
-      if (!lower) return true;
-
-      return (
-        (s.name || '').toLowerCase().includes(lower) ||
-        (s.registerNumber || '').toLowerCase().includes(lower) ||
-        sYear.includes(lower) ||
-        `${sYear} year`.includes(lower)
-      );
-    });
-
-    // Auto-select the top matching student so dropdown, state, and pill stay 100% in sync
-    if (matched.length > 0 && !matched.some((s) => s.id === selectedStudentId)) {
-      setSelectedStudentId(matched[0].id);
-    }
+  const handleSelectStudent = (studentId) => {
+    setSelectedStudentId(studentId);
+    setIsSearchingStudent(false);
+    setSearchTerm('');
   };
 
-  const handleYearFilterChange = (yr) => {
-    setYearFilter(yr);
-    handleSearchChange(searchTerm, yr);
+  const handleQuickPresetClick = (preset) => {
+    setReason(preset.label);
+    setAmount(String(preset.amount));
   };
-
-  const handleSelectStudentChange = (e) => {
-    setSelectedStudentId(e.target.value);
-  };
-
-  const selectedStudent = students.find((s) => s.id === selectedStudentId);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -126,7 +128,7 @@ export const AddFineModal = ({
 
     const finalReason = reason.trim();
     if (!finalReason) {
-      setError('Please enter or select a reason for the fine.');
+      setError('Please enter or select a fine reason.');
       return;
     }
 
@@ -169,136 +171,208 @@ export const AddFineModal = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs overflow-y-auto">
-      <div className="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden my-8">
-        {/* Modal Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-slate-50">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-slate-900/60 backdrop-blur-xs overflow-y-auto">
+      <div className="relative w-full max-w-xl bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-200">
+        
+        {/* Top Header */}
+        <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-blue-50/40">
           <div>
-            <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">
-              Department Fine Desk
-            </span>
-            <h3 className="text-base sm:text-lg font-bold text-slate-900 mt-0.5">
-              {initialData ? 'Edit Fine Record' : 'Record New Department Fine'}
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse" />
+              <span className="text-[11px] font-bold uppercase tracking-wider text-blue-700">
+                Department Fine Desk • ECE
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-black text-slate-900 mt-0.5">
+              {initialData ? 'Edit Department Fine' : 'Record New Department Fine'}
             </h3>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-200/60 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-700 rounded-xl hover:bg-white/80 border border-transparent hover:border-slate-200 transition-all"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-5">
           {error && (
-            <div className="flex items-center gap-2 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-medium">
               <AlertCircle className="w-4 h-4 shrink-0 text-rose-500" />
               <span>{error}</span>
             </div>
           )}
 
-          {/* Student Selector */}
+          {/* --- 1. STUDENT SELECTOR (User Friendly) --- */}
           <div>
-            <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider">
-                Select Student (ECE) <span className="text-rose-500">*</span>
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Select ECE Student <span className="text-rose-500">*</span>
               </label>
 
-              {/* Quick Year Filter Chips */}
-              {!initialData && (
-                <div className="flex items-center gap-1 text-[11px]">
-                  {['All', '2nd', '3rd', '4th'].map((yr) => (
-                    <button
-                      key={yr}
-                      type="button"
-                      onClick={() => handleYearFilterChange(yr)}
-                      className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
-                        yearFilter === yr
-                          ? 'bg-blue-600 text-white shadow-2xs'
-                          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
-                    >
-                      {yr === 'All' ? 'All' : `${yr} Yr`}
-                    </button>
-                  ))}
-                </div>
-              )}
+              {/* Year Filter Chips */}
+              <div className="flex items-center gap-1 bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[11px]">
+                {['All', '2nd', '3rd', '4th'].map((yr) => (
+                  <button
+                    key={yr}
+                    type="button"
+                    onClick={() => {
+                      setYearFilter(yr);
+                      setIsSearchingStudent(true);
+                    }}
+                    className={`px-2 py-0.5 rounded-md font-semibold transition-all ${
+                      yearFilter === yr
+                        ? 'bg-blue-600 text-white shadow-xs'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200'
+                    }`}
+                  >
+                    {yr === 'All' ? 'All (121)' : `${yr} Yr`}
+                  </button>
+                ))}
+              </div>
             </div>
 
-            {/* Filter Search Input */}
-            {!initialData && (
-              <div className="relative mb-2">
-                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
-                <input
-                  type="text"
-                  placeholder="Filter student by name, register number (e.g. 731724...), or year..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearchChange(e.target.value)}
-                  className="w-full pl-9 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:bg-white"
-                />
+            {/* Selected Student Pill Card (When student is chosen and not currently searching) */}
+            {selectedStudent && !isSearchingStudent ? (
+              <div className="p-3.5 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between gap-3 text-xs shadow-2xs hover:border-blue-300 transition-all">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-700 text-white font-bold flex items-center justify-center text-sm font-mono shrink-0 shadow-xs">
+                    {selectedStudent.name.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-bold text-slate-900 text-sm truncate">
+                        {selectedStudent.name}
+                      </span>
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 shrink-0">
+                        {selectedStudent.year} Year ECE
+                      </span>
+                    </div>
+                    <p className="text-slate-600 font-mono text-[11px] mt-0.5">
+                      Reg No: <strong className="text-blue-900 font-semibold">{selectedStudent.registerNumber}</strong>
+                    </p>
+                  </div>
+                </div>
+
+                {!initialData && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsSearchingStudent(true);
+                      setTimeout(() => searchInputRef.current?.focus(), 50);
+                    }}
+                    className="px-3 py-1.5 text-xs font-bold text-blue-700 bg-white hover:bg-blue-50 border border-blue-300 rounded-lg transition-all shadow-2xs shrink-0 active:scale-95"
+                  >
+                    Change Student
+                  </button>
+                )}
+              </div>
+            ) : (
+              /* Search & Live Select Dropdown */
+              <div className="space-y-2 border border-slate-300 p-3 rounded-xl bg-slate-50/50">
+                <div className="relative">
+                  <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search by student name, register number (e.g. 731724...), or year..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-9 pr-9 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-lg text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                  />
+                  {selectedStudent && (
+                    <button
+                      type="button"
+                      onClick={() => setIsSearchingStudent(false)}
+                      className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-700"
+                      title="Keep current student"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+
+                {/* Live Student Options List */}
+                <div className="max-h-48 overflow-y-auto rounded-lg border border-slate-200 bg-white divide-y divide-slate-100">
+                  {filteredStudents.length === 0 ? (
+                    <div className="p-4 text-center text-slate-400 text-xs">
+                      No ECE students found matching "{searchTerm}".
+                    </div>
+                  ) : (
+                    filteredStudents.map((s) => {
+                      const isSelected = s.id === selectedStudentId;
+                      return (
+                        <div
+                          key={s.id}
+                          onClick={() => handleSelectStudent(s.id)}
+                          className={`p-2.5 text-xs flex items-center justify-between cursor-pointer transition-colors ${
+                            isSelected ? 'bg-blue-50 text-blue-900 font-semibold' : 'hover:bg-slate-50 text-slate-800'
+                          }`}
+                        >
+                          <div>
+                            <span className="font-bold text-slate-900">{s.name}</span>
+                            <span className="text-slate-400 mx-1.5">•</span>
+                            <span className="font-mono text-blue-700 font-medium">{s.registerNumber}</span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
+                              {s.year} Yr
+                            </span>
+                            {isSelected && <Check className="w-3.5 h-3.5 text-blue-600" />}
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
               </div>
             )}
-
-            {/* Dropdown Select */}
-            <select
-              value={selectedStudentId}
-              onChange={handleSelectStudentChange}
-              disabled={!!initialData}
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-100 font-medium"
-            >
-              <option value="" disabled>-- Select ECE Student --</option>
-              {filteredStudents.length === 0 ? (
-                <option value="" disabled>No student matches current filter</option>
-              ) : (
-                filteredStudents.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.registerNumber}) - {s.year} Year ECE
-                  </option>
-                ))
-              )}
-            </select>
           </div>
 
-          {/* Selected Student Pill */}
-          {selectedStudent && (
-            <div className="p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs flex flex-wrap items-center justify-between gap-2 text-slate-700 animate-in fade-in duration-150">
-              <div className="flex items-center gap-2">
-                <span className="text-slate-500">Selected: </span>
-                <strong className="text-slate-900 font-bold">{selectedStudent.name}</strong>
-                <span className="text-slate-300">|</span>
-                <span className="text-slate-500">Reg: </span>
-                <strong className="text-blue-900 font-mono">{selectedStudent.registerNumber}</strong>
-              </div>
-              <div className="flex items-center gap-3">
-                <div>
-                  <span className="text-slate-500">Year: </span>
-                  <span className="font-semibold text-blue-800 bg-blue-100/60 px-1.5 py-0.5 rounded">
-                    {selectedStudent.year} Year
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-500">Dept: </span>
-                  <span className="text-blue-700 font-bold">ECE</span>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* Reason Input (Typable with Datalist Suggestions) */}
+          {/* --- 2. FINE REASON & QUICK CHIPS --- */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-              Fine Reason <span className="text-rose-500">*</span>
-            </label>
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+                Fine Reason <span className="text-rose-500">*</span>
+              </label>
+              <span className="text-[11px] text-slate-400 font-medium">Click a quick chip or type below</span>
+            </div>
+
+            {/* Quick Reason Chips */}
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
+              {QUICK_FINE_PRESETS.map((preset) => {
+                const isMatching = reason === preset.label;
+                return (
+                  <button
+                    key={preset.tag}
+                    type="button"
+                    onClick={() => handleQuickPresetClick(preset)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 border ${
+                      isMatching
+                        ? 'bg-blue-600 text-white border-blue-600 shadow-xs'
+                        : 'bg-slate-50 text-slate-700 hover:bg-slate-100 border-slate-200 hover:border-slate-300'
+                    }`}
+                  >
+                    <span>{preset.tag}</span>
+                    <span className={`text-[10px] font-bold ${isMatching ? 'text-blue-100' : 'text-slate-400'}`}>
+                      ₹{preset.amount}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Typable Reason Input */}
             <input
               type="text"
               list="fine-reasons-datalist"
               value={reason}
               onChange={(e) => setReason(e.target.value)}
-              placeholder="Type fine reason (e.g. Late submission of Lab Record, Mobile phone in class...)"
+              placeholder="e.g. Late submission of Lab Observation / Record"
               required
-              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+              className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-medium"
             />
             <datalist id="fine-reasons-datalist">
               {FINE_REASONS.map((r) => (
@@ -307,13 +381,32 @@ export const AddFineModal = ({
             </datalist>
           </div>
 
-          {/* Amount & Status Grid */}
+          {/* --- 3. AMOUNT & STATUS WITH QUICK SELECTORS --- */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Amount */}
+            {/* Fine Amount */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Fine Amount (₹ INR) <span className="text-rose-500">*</span>
               </label>
+
+              {/* Quick Amount Buttons */}
+              <div className="flex items-center gap-1.5 mb-2">
+                {QUICK_AMOUNTS.map((amt) => (
+                  <button
+                    key={amt}
+                    type="button"
+                    onClick={() => setAmount(String(amt))}
+                    className={`flex-1 py-1 rounded-lg text-xs font-bold font-mono transition-all border ${
+                      amount === String(amt)
+                        ? 'bg-red-700 text-white border-red-700 shadow-2xs'
+                        : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    ₹{amt}
+                  </button>
+                ))}
+              </div>
+
               <div className="relative">
                 <span className="absolute left-3.5 top-2.5 text-slate-500 font-bold">₹</span>
                 <input
@@ -322,39 +415,81 @@ export const AddFineModal = ({
                   step="1"
                   value={amount}
                   onChange={(e) => setAmount(e.target.value)}
-                  placeholder="e.g. 150"
+                  placeholder="e.g. 100"
                   required
-                  className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 font-mono font-semibold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                  className="w-full pl-8 pr-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-900 font-mono font-bold focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                 />
               </div>
             </div>
 
-            {/* Status */}
+            {/* Payment Status Segmented Selector */}
             <div>
-              <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+              <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                 Payment Status <span className="text-rose-500">*</span>
               </label>
-              <select
-                value={status}
-                onChange={(e) => setStatus(e.target.value)}
-                className={`w-full px-3.5 py-2.5 bg-white border rounded-xl text-sm font-semibold focus:outline-none focus:ring-2 ${
-                  status === 'Paid'
-                    ? 'border-emerald-500 text-emerald-700 focus:ring-emerald-100'
-                    : status === 'Unpaid'
-                    ? 'border-amber-500 text-amber-700 focus:ring-amber-100'
-                    : 'border-rose-500 text-rose-700 focus:ring-rose-100'
-                }`}
-              >
-                <option value="Unpaid">Unpaid (Pending)</option>
-                <option value="Paid">Paid (Treasury)</option>
-                <option value="Cancelled">Cancelled (Waived)</option>
-              </select>
+
+              <div className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-xl border border-slate-200 mb-2">
+                <button
+                  type="button"
+                  onClick={() => setStatus('Unpaid')}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    status === 'Unpaid'
+                      ? 'bg-white text-amber-800 shadow-xs border border-amber-300'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Unpaid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatus('Paid')}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    status === 'Paid'
+                      ? 'bg-emerald-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Paid
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setStatus('Cancelled')}
+                  className={`py-1.5 text-xs font-bold rounded-lg transition-all ${
+                    status === 'Cancelled'
+                      ? 'bg-rose-600 text-white shadow-xs'
+                      : 'text-slate-600 hover:text-slate-900'
+                  }`}
+                >
+                  Waived
+                </button>
+              </div>
+
+              <div className="text-[11px] text-slate-500 flex items-center gap-1.5 px-1">
+                {status === 'Unpaid' && (
+                  <span className="text-amber-700 font-semibold flex items-center gap-1">
+                    <Clock className="w-3.5 h-3.5 text-amber-600" />
+                    Student will have a pending department due of ₹{amount || 0}
+                  </span>
+                )}
+                {status === 'Paid' && (
+                  <span className="text-emerald-700 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Immediately credited to ECE Department Treasury
+                  </span>
+                )}
+                {status === 'Cancelled' && (
+                  <span className="text-rose-700 font-semibold flex items-center gap-1">
+                    <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
+                    Waived / Approved without financial penalty
+                  </span>
+                )}
+              </div>
             </div>
           </div>
 
-          {/* Remarks */}
+          {/* --- 4. OPTIONAL STAFF REMARKS --- */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
               Staff Remarks / Faculty In-Charge (Optional)
             </label>
             <input
@@ -362,25 +497,44 @@ export const AddFineModal = ({
               placeholder="e.g. Issued by DSP Lab In-charge / Paid via Cash Desk"
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
-              className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600"
+              className="w-full px-3.5 py-2 bg-white border border-slate-300 rounded-xl text-xs sm:text-sm text-slate-800 focus:outline-none focus:border-blue-600"
             />
           </div>
 
-          {/* Footer */}
-          <div className="pt-4 border-t border-slate-100 flex items-center justify-end gap-3">
+          {/* --- 5. LIVE SUMMARY BANNER --- */}
+          {selectedStudent && (
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-xs flex items-center justify-between text-slate-700">
+              <span className="text-slate-500">
+                Recording fine of <strong className="text-slate-900 font-mono font-bold">₹{amount || 0}</strong> for{' '}
+                <strong className="text-blue-900">{selectedStudent.name}</strong> ({selectedStudent.year} Year ECE)
+              </span>
+              <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                status === 'Paid'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : status === 'Unpaid'
+                  ? 'bg-amber-100 text-amber-800'
+                  : 'bg-rose-100 text-rose-800'
+              }`}>
+                {status}
+              </span>
+            </div>
+          )}
+
+          {/* --- 6. FOOTER ACTIONS --- */}
+          <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors"
+              className="px-4 py-2.5 text-sm font-semibold text-slate-600 hover:text-slate-900 rounded-xl hover:bg-slate-100 transition-colors"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={submitting}
-              className="px-5 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-2.5 text-sm font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-xl shadow-md shadow-blue-500/20 transition-all flex items-center gap-2 disabled:opacity-50 active:scale-95"
             >
-              {submitting ? 'Saving...' : initialData ? 'Update Fine' : 'Record Fine'}
+              {submitting ? 'Recording...' : initialData ? 'Update Fine Record' : 'Record Fine'}
             </button>
           </div>
         </form>
