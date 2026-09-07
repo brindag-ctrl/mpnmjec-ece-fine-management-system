@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext';
 import { useToast } from './components/Toast';
 import { studentService } from './services/studentService';
 import { fineService } from './services/fineService';
+import { spendingService } from './services/spendingService';
 
 // Layout & Components
 import { Sidebar } from './components/Sidebar';
@@ -18,6 +19,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
 import { StudentDetails } from './pages/StudentDetails';
 import { Fines } from './pages/Fines';
+import { Spendings } from './pages/Spendings';
 
 export const App = () => {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -31,6 +33,7 @@ export const App = () => {
   // Data State
   const [students, setStudents] = useState([]);
   const [fines, setFines] = useState([]);
+  const [spendings, setSpendings] = useState([]);
   const [dataLoading, setDataLoading] = useState(true);
 
   // Modal States
@@ -56,12 +59,14 @@ export const App = () => {
   const loadAllData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const [fetchedStudents, fetchedFines] = await Promise.all([
+      const [fetchedStudents, fetchedFines, fetchedSpendings] = await Promise.all([
         studentService.getAllStudents(),
         fineService.getAllFines(),
+        spendingService.getAllSpendings(),
       ]);
       setStudents(fetchedStudents);
       setFines(fetchedFines);
+      setSpendings(fetchedSpendings);
     } catch (err) {
       console.error('Error fetching data:', err);
       toast.error('Failed to load department records: ' + err.message);
@@ -266,6 +271,37 @@ export const App = () => {
     });
   };
 
+  // --- Spending Actions ---
+  const handleAddSpending = async (spendingData) => {
+    try {
+      const created = await spendingService.addSpending(spendingData);
+      setSpendings((prev) => [created, ...prev]);
+      toast.success(`Spending "${spendingData.title}" recorded successfully.`);
+    } catch (err) {
+      toast.error('Failed to record spending: ' + err.message);
+      throw err;
+    }
+  };
+
+  const handleDeleteSpending = (spending) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete Spending Record: ${spending.title}`,
+      message: `Are you sure you want to remove this expense of ₹${spending.amount}?`,
+      confirmText: 'Delete Spending',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await spendingService.deleteSpending(spending.id);
+          setSpendings((prev) => prev.filter((s) => s.id !== spending.id));
+          toast.success('Spending record deleted successfully.');
+        } catch (err) {
+          toast.error('Failed to delete spending: ' + err.message);
+        }
+      },
+    });
+  };
+
   // Navigation Helpers
   const handleViewStudentProfile = (studentId) => {
     setViewingStudentId(studentId);
@@ -349,6 +385,7 @@ export const App = () => {
                 <Dashboard
                   students={students}
                   fines={fines}
+                  spendings={spendings}
                   onOpenAddFine={() => {
                     setEditingFine(null);
                     setFineDefaultStudentId(null);
@@ -411,6 +448,15 @@ export const App = () => {
                   onStatusChange={handleStatusChange}
                   onViewStudentHistory={handleViewStudentProfile}
                   onOpenReceipt={(fine) => setReceiptModalFine(fine)}
+                />
+              )}
+
+              {currentPage === 'spendings' && (
+                <Spendings
+                  spendings={spendings}
+                  onAddSpending={handleAddSpending}
+                  onDeleteSpending={handleDeleteSpending}
+                  totalPaidFines={fines.filter(f => f.status === 'Paid').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0)}
                 />
               )}
             </>
