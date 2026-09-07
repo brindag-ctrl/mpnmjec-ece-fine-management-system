@@ -18,7 +18,6 @@ import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
 import { StudentDetails } from './pages/StudentDetails';
 import { Fines } from './pages/Fines';
-import { Settings } from './pages/Settings';
 
 export const App = () => {
   const { user, loading: authLoading, isAuthenticated } = useAuth();
@@ -413,10 +412,6 @@ export const App = () => {
                   onViewStudentHistory={handleViewStudentProfile}
                   onOpenReceipt={(fine) => setReceiptModalFine(fine)}
                 />
-              )}
-
-              {currentPage === 'settings' && (
-                <Settings />
               )}
             </>
           )}

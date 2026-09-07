@@ -3,7 +3,6 @@ import {
   LayoutDashboard, 
   Users, 
   Receipt, 
-  Settings, 
   LogOut, 
   ShieldCheck,
   X
@@ -18,7 +17,6 @@ export const Sidebar = ({ currentPage, onNavigate, mobileOpen, onCloseMobile }) 
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'students', label: 'Students', icon: Users },
     { id: 'fines', label: 'Fine Management', icon: Receipt },
-    { id: 'settings', label: 'Settings', icon: Settings },
   ];
 
   const handleNav = (pageId) => {
