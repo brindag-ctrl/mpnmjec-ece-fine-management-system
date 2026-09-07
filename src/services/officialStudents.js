@@ -126,6 +126,7 @@ export const OFFICIAL_4TH_YEAR_ECE = [
   { registerNumber: '731723106036', name: 'SANTHAKUMAR P', year: '4th', department: 'ECE', phone: '9361073202', email: 'kumark18999@gmail.com' },
   { registerNumber: '731723106037', name: 'SARAVANAN A', year: '4th', department: 'ECE', phone: '8754898409', email: 'saravananvengi000@gmail.com' },
   { registerNumber: '731723106038', name: 'SATHISH S', year: '4th', department: 'ECE', phone: '7639276889', email: 'sathishkinga8@gmail.com' },
+  { registerNumber: '731723106039', name: 'SEKAR', year: 'Discontinued', department: 'ECE', phone: '', email: '' },
   { registerNumber: '731723106040', name: 'SHANKAR M', year: '4th', department: 'ECE', phone: '7548829477', email: 'mohanmshankar@gmail.com' },
   { registerNumber: '731723106041', name: 'SREE DEVIKA S', year: '4th', department: 'ECE', phone: '9360270942', email: 'sreedevika1509@gmail.com' },
   { registerNumber: '731723106042', name: 'SUBA N', year: '4th', department: 'ECE', phone: '9363351563', email: 'subasuba2237@gmail.com' },
