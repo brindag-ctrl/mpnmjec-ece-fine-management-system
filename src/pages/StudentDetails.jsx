@@ -86,7 +86,11 @@ export const StudentDetails = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-slate-900">{student.name}</h2>
-                {(student.year || '').toLowerCase() === 'discontinued' ? (
+                {(student.year || '').toLowerCase().includes('passout') || (student.year || '').toLowerCase().includes('passed out') ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-50 border border-purple-300 text-purple-800 flex items-center gap-1.5">
+                    🎓 {student.year.startsWith('Passout-') ? student.year : `Passout ${student.year}`}
+                  </span>
+                ) : (student.year || '').toLowerCase() === 'discontinued' ? (
                   <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 border border-amber-300 text-amber-800 flex items-center gap-1.5">
                     <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                     Discontinued Student

@@ -84,8 +84,9 @@ export const AddFineModal = ({
       const sYear = (s.year || '').toLowerCase();
       const matchesYear =
         newYearFilter === 'All' ||
-        sYear === newYearFilter.toLowerCase() ||
-        sYear.includes(newYearFilter.toLowerCase());
+        (newYearFilter === 'Passed Out'
+          ? sYear.includes('passout') || sYear.includes('passed out')
+          : sYear === newYearFilter.toLowerCase() || sYear.includes(newYearFilter.toLowerCase()));
 
       if (!matchesYear) return false;
       if (!lower) return true;
@@ -209,20 +210,22 @@ export const AddFineModal = ({
               {/* Quick Year Filter Chips */}
               {!initialData && (
                 <div className="flex flex-wrap items-center gap-1 text-[11px]">
-                  {['All', '2nd', '3rd', '4th', 'Discontinued'].map((yr) => (
+                  {['All', '2nd', '3rd', '4th', 'Passed Out', 'Discontinued'].map((yr) => (
                     <button
                       key={yr}
                       type="button"
                       onClick={() => handleYearFilterChange(yr)}
                       className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
                         yearFilter === yr
-                          ? yr === 'Discontinued'
+                          ? yr === 'Passed Out'
+                            ? 'bg-purple-600 text-white shadow-2xs'
+                            : yr === 'Discontinued'
                             ? 'bg-amber-600 text-white shadow-2xs'
                             : 'bg-blue-600 text-white shadow-2xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      {yr === 'All' ? 'All' : yr === 'Discontinued' ? 'Discontinued' : `${yr} Yr`}
+                      {yr === 'All' ? 'All' : yr === 'Passed Out' ? 'Passed Out' : yr === 'Discontinued' ? 'Discontinued' : `${yr} Yr`}
                     </button>
                   ))}
                 </div>
@@ -254,11 +257,18 @@ export const AddFineModal = ({
               {filteredStudents.length === 0 ? (
                 <option value="" disabled>No student matches current filter</option>
               ) : (
-                filteredStudents.map((s) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name} ({s.registerNumber}) - {(s.year || '').toLowerCase() === 'discontinued' ? 'Discontinued' : `${s.year} Year ECE`}
-                  </option>
-                ))
+                filteredStudents.map((s) => {
+                  const sYrLower = (s.year || '').toLowerCase();
+                  const isPassout = sYrLower.includes('passout') || sYrLower.includes('passed out');
+                  const isDisc = sYrLower === 'discontinued';
+                  const yrLabel = isPassout ? (s.year.startsWith('Passout-') ? s.year : `Passout ${s.year}`) : isDisc ? 'Discontinued' : `${s.year} Year ECE`;
+
+                  return (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.registerNumber}) - {yrLabel}
+                    </option>
+                  );
+                })
               )}
             </select>
           </div>
@@ -276,7 +286,11 @@ export const AddFineModal = ({
               <div className="flex items-center gap-3">
                 <div>
                   <span className="text-slate-500">Year: </span>
-                  {(selectedStudent.year || '').toLowerCase() === 'discontinued' ? (
+                  {(selectedStudent.year || '').toLowerCase().includes('passout') || (selectedStudent.year || '').toLowerCase().includes('passed out') ? (
+                    <span className="font-bold text-purple-800 bg-purple-100 px-1.5 py-0.5 rounded border border-purple-300">
+                      🎓 {selectedStudent.year.startsWith('Passout-') ? selectedStudent.year : `Passout ${selectedStudent.year}`}
+                    </span>
+                  ) : (selectedStudent.year || '').toLowerCase() === 'discontinued' ? (
                     <span className="font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">
                       Discontinued
                     </span>

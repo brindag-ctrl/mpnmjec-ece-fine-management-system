@@ -9,7 +9,8 @@ export const AddStudentModal = ({
 }) => {
   const [name, setName] = useState('');
   const [registerNumber, setRegisterNumber] = useState('');
-  const [year, setYear] = useState('2nd');
+  const [yearMode, setYearMode] = useState('2nd');
+  const [passoutYear, setPassoutYear] = useState('2026');
   const [phone, setPhone] = useState('');
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -20,12 +21,21 @@ export const AddStudentModal = ({
       if (initialData) {
         setName(initialData.name || '');
         setRegisterNumber(initialData.registerNumber || '');
-        setYear(initialData.year || '2nd');
+        const currentYear = initialData.year || '2nd';
+        if (currentYear.toLowerCase().includes('passout') || currentYear.toLowerCase().includes('passed out')) {
+          setYearMode('Passed Out');
+          const extractedYear = currentYear.replace(/[^0-9]/g, '');
+          setPassoutYear(extractedYear || '2026');
+        } else {
+          setYearMode(currentYear);
+          setPassoutYear('2026');
+        }
         setPhone(initialData.phone || '');
       } else {
         setName('');
         setRegisterNumber('');
-        setYear('2nd');
+        setYearMode('2nd');
+        setPassoutYear('2026');
         setPhone('');
       }
     }
@@ -47,10 +57,20 @@ export const AddStudentModal = ({
       return;
     }
 
+    if (yearMode === 'Passed Out' && !passoutYear.trim()) {
+      setError('Please enter a valid passout year (e.g. 2026).');
+      return;
+    }
+
     if (phone.trim() && !/^\d{10}$/.test(phone.trim())) {
       setError('Phone number must be a valid 10-digit number if provided.');
       return;
     }
+
+    const finalYear =
+      yearMode === 'Passed Out'
+        ? `Passout-${passoutYear.trim()}`
+        : yearMode;
 
     setSubmitting(true);
     try {
@@ -59,7 +79,7 @@ export const AddStudentModal = ({
           name: name.trim(),
           registerNumber: registerNumber.trim(),
           department: 'ECE',
-          year: year,
+          year: finalYear,
           phone: phone.trim(),
         },
         initialData?.id
@@ -149,13 +169,14 @@ export const AddStudentModal = ({
                 Year of Study / Status <span className="text-rose-500">*</span>
               </label>
               <select
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                value={yearMode}
+                onChange={(e) => setYearMode(e.target.value)}
+                className="w-full px-3.5 py-2.5 bg-white border border-slate-300 rounded-xl text-sm text-slate-800 focus:outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 font-medium"
               >
                 <option value="2nd">2nd Year</option>
                 <option value="3rd">3rd Year</option>
                 <option value="4th">4th Year (Final)</option>
+                <option value="Passed Out">Passed Out / Alumni</option>
                 <option value="Discontinued">Discontinued</option>
               </select>
             </div>
@@ -171,6 +192,29 @@ export const AddStudentModal = ({
               </div>
             </div>
           </div>
+
+          {/* Typable Passout Year Input when Passed Out is selected */}
+          {yearMode === 'Passed Out' && (
+            <div className="p-3.5 bg-purple-50 border border-purple-200 rounded-xl space-y-1.5 animate-in fade-in duration-150">
+              <label className="block text-xs font-bold text-purple-900 uppercase tracking-wider">
+                Specify Passout / Graduation Year <span className="text-rose-500">*</span>
+              </label>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-purple-700">Passout -</span>
+                <input
+                  type="text"
+                  placeholder="e.g. 2026, 2025, 2024"
+                  value={passoutYear}
+                  onChange={(e) => setPassoutYear(e.target.value)}
+                  className="flex-1 px-3 py-1.5 bg-white border border-purple-300 rounded-lg text-sm text-purple-900 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  required
+                />
+              </div>
+              <p className="text-[11px] text-purple-600">
+                This student will be classified as <strong>Passout-{passoutYear || 'YYYY'}</strong>.
+              </p>
+            </div>
+          )}
 
           {/* Phone Number */}
           <div>

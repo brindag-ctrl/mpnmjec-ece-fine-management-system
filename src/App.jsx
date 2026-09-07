@@ -122,10 +122,53 @@ export const App = () => {
       setStudents((prev) =>
         prev.map((s) => (studentIds.includes(s.id) ? { ...s, year: targetYear } : s))
       );
-      toast.success(`Successfully promoted ${studentIds.length} student(s) to ${targetYear} Year ECE!`);
+      toast.success(`Successfully updated ${studentIds.length} student(s) to ${targetYear}!`);
     } catch (err) {
-      toast.error('Failed to promote students: ' + err.message);
+      toast.error('Failed to update student status: ' + err.message);
     }
+  };
+
+  const handleBulkDemoteStudents = (studentIds) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Bulk Demote (${studentIds.length}) Students`,
+      message: `Are you sure you want to demote the ${studentIds.length} selected student(s) back by 1 academic year (e.g. 4th -> 3rd, 3rd -> 2nd)?`,
+      confirmText: `Demote ${studentIds.length} Students`,
+      type: 'warning',
+      onConfirm: async () => {
+        try {
+          const selected = students.filter((s) => studentIds.includes(s.id));
+          const stepDown = (yr) => {
+            const lower = (yr || '').toLowerCase();
+            if (lower.includes('passout') || lower.includes('passed out')) return '4th';
+            if (lower === '4th' || lower.includes('4')) return '3rd';
+            if (lower === '3rd' || lower.includes('3')) return '2nd';
+            return '2nd';
+          };
+
+          await Promise.all(
+            selected.map((s) => {
+              const newYr = stepDown(s.year);
+              return studentService.updateStudent(s.id, { year: newYr });
+            })
+          );
+
+          setStudents((prev) =>
+            prev.map((s) => {
+              if (studentIds.includes(s.id)) {
+                return { ...s, year: stepDown(s.year) };
+              }
+              return s;
+            })
+          );
+          toast.success(`Demoted ${studentIds.length} student(s) back by 1 year.`);
+        } catch (err) {
+          toast.error('Failed to demote students: ' + err.message);
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const handleBulkDeleteStudents = (studentIds) => {
@@ -336,6 +379,7 @@ export const App = () => {
                   onViewStudentHistory={handleViewStudentProfile}
                   onAddFineForStudent={handleOpenAddFineForStudent}
                   onBulkPromoteStudents={handleBulkPromoteStudents}
+                  onBulkDemoteStudents={handleBulkDemoteStudents}
                   onBulkDeleteStudents={handleBulkDeleteStudents}
                 />
               )}

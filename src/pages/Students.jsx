@@ -10,6 +10,7 @@ import {
   History, 
   Plus,
   ArrowUpCircle,
+  ArrowDownCircle,
   CheckSquare,
   Square,
   AlertTriangle,
@@ -25,23 +26,29 @@ export const Students = ({
   onViewStudentHistory,
   onAddFineForStudent,
   onBulkPromoteStudents,
+  onBulkDemoteStudents,
   onBulkDeleteStudents,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [yearFilter, setYearFilter] = useState('All');
   const [selectedStudentIds, setSelectedStudentIds] = useState([]);
   const [targetPromoteYear, setTargetPromoteYear] = useState('3rd');
+  const [customPassoutYear, setCustomPassoutYear] = useState('2026');
 
   const filteredStudents = students.filter((std) => {
     const matchesSearch =
       std.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       std.registerNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      (std.phone && std.phone.includes(searchTerm));
+      (std.phone && std.phone.includes(searchTerm)) ||
+      (std.year && std.year.toLowerCase().includes(searchTerm.toLowerCase()));
 
+    const sYearLower = (std.year || '').toLowerCase();
     const matchesYear =
       yearFilter === 'All'
         ? true
-        : (std.year || '').toLowerCase() === yearFilter.toLowerCase();
+        : yearFilter === 'Passed Out'
+        ? sYearLower.includes('passout') || sYearLower.includes('passed out')
+        : sYearLower === yearFilter.toLowerCase();
 
     return matchesSearch && matchesYear;
   });
@@ -67,7 +74,19 @@ export const Students = ({
 
   const handleBulkPromoteSubmit = () => {
     if (selectedStudentIds.length === 0) return;
-    onBulkPromoteStudents(selectedStudentIds, targetPromoteYear);
+    const finalTarget =
+      targetPromoteYear === 'Passed Out'
+        ? customPassoutYear.trim() ? `Passout-${customPassoutYear.trim()}` : 'Passed Out'
+        : targetPromoteYear;
+    onBulkPromoteStudents(selectedStudentIds, finalTarget);
+    setSelectedStudentIds([]);
+  };
+
+  const handleBulkDemoteSubmit = () => {
+    if (selectedStudentIds.length === 0) return;
+    if (onBulkDemoteStudents) {
+      onBulkDemoteStudents(selectedStudentIds);
+    }
     setSelectedStudentIds([]);
   };
 
@@ -139,6 +158,7 @@ export const Students = ({
             <option value="2nd">2nd Year ECE</option>
             <option value="3rd">3rd Year ECE</option>
             <option value="4th">4th Year ECE (Final)</option>
+            <option value="Passed Out">Passed Out / Alumni</option>
             <option value="Discontinued">Discontinued Students</option>
           </select>
         </div>
@@ -146,7 +166,7 @@ export const Students = ({
 
       {/* Bulk Actions Floating Bar (Active when students are selected) */}
       {isSomeSelected && (
-        <div className="p-4 rounded-2xl bg-blue-900 text-white shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
+        <div className="p-4 rounded-2xl bg-blue-900 text-white shadow-xl flex flex-col lg:flex-row items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2 duration-200">
           <div className="flex items-center gap-3">
             <span className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-800 text-blue-200 font-bold text-xs">
               {selectedStudentIds.length}
@@ -162,10 +182,10 @@ export const Students = ({
             </button>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
+          <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto justify-end">
             {/* Bulk Year Promotion / Status */}
-            <div className="flex items-center gap-1.5 bg-blue-800/80 p-1 rounded-xl border border-blue-700">
-              <span className="text-[11px] font-semibold text-blue-200 pl-2">Update Status to:</span>
+            <div className="flex flex-wrap items-center gap-1.5 bg-blue-800/80 p-1 rounded-xl border border-blue-700">
+              <span className="text-[11px] font-semibold text-blue-200 pl-2">Update Status:</span>
               <select
                 value={targetPromoteYear}
                 onChange={(e) => setTargetPromoteYear(e.target.value)}
@@ -174,17 +194,42 @@ export const Students = ({
                 <option value="2nd">2nd Year</option>
                 <option value="3rd">3rd Year</option>
                 <option value="4th">4th Year</option>
+                <option value="Passed Out">Passed Out (Specify Year)</option>
                 <option value="Discontinued">Discontinued</option>
-                <option value="Graduated">Graduated</option>
               </select>
+
+              {/* Typable Passout Year Input in Bulk Bar */}
+              {targetPromoteYear === 'Passed Out' && (
+                <div className="flex items-center gap-1 bg-purple-950/80 px-2 py-0.5 rounded-lg border border-purple-500">
+                  <span className="text-[10px] font-bold text-purple-300">Passout-</span>
+                  <input
+                    type="text"
+                    placeholder="2026"
+                    value={customPassoutYear}
+                    onChange={(e) => setCustomPassoutYear(e.target.value)}
+                    className="w-14 px-1.5 py-0.5 text-xs font-mono font-bold bg-purple-900 text-white rounded border border-purple-400 focus:outline-none focus:ring-1 focus:ring-purple-300"
+                  />
+                </div>
+              )}
+
               <button
                 onClick={handleBulkPromoteSubmit}
                 className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors shadow-xs"
               >
                 <ArrowUpCircle className="w-3.5 h-3.5" />
-                <span>Apply to Selected</span>
+                <span>Apply Status</span>
               </button>
             </div>
+
+            {/* Quick 1-Click Demote (-1 Year) */}
+            <button
+              onClick={handleBulkDemoteSubmit}
+              title="Demote selected students back by 1 academic year (e.g. 4th -> 3rd, 3rd -> 2nd)"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition-colors shadow-xs"
+            >
+              <ArrowDownCircle className="w-3.5 h-3.5" />
+              <span>Demote (-1 Yr)</span>
+            </button>
 
             {/* Bulk Remove */}
             <button
@@ -278,7 +323,11 @@ export const Students = ({
                         {student.registerNumber}
                       </td>
                       <td className="p-3.5">
-                        {(student.year || '').toLowerCase() === 'discontinued' ? (
+                        {(student.year || '').toLowerCase().includes('passout') || (student.year || '').toLowerCase().includes('passed out') ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 border border-purple-300 text-purple-800">
+                            🎓 {student.year.startsWith('Passout-') ? student.year : `Passout ${student.year}`}
+                          </span>
+                        ) : (student.year || '').toLowerCase() === 'discontinued' ? (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 border border-amber-300 text-amber-800">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                             Discontinued
