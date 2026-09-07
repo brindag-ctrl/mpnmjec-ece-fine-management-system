@@ -55,6 +55,7 @@ export const studentService = {
           department: 'ECE',
           year: std.year || '2nd',
           phone: std.phone || '',
+          email: std.email || '',
           createdAt: nowIso,
           updatedAt: nowIso,
         };
@@ -63,7 +64,7 @@ export const studentService = {
           ...payload,
           createdAt: serverTimestamp(),
           updatedAt: serverTimestamp(),
-        });
+        }, { merge: true });
 
         syncedList.push({ id: customDocId, ...payload });
       }
@@ -90,10 +91,41 @@ export const studentService = {
           students.push({ id: doc.id, ...doc.data() });
         });
 
-        // If database is empty, automatically upload the 53 2nd Year ECE students!
+        // If database is empty, automatically upload official students to Firestore!
         if (students.length === 0) {
-          console.log('Database empty. Automatically uploading 53 2nd Year ECE students to Firestore...');
+          console.log('Database empty. Automatically uploading official ECE students to Firestore...');
           return await studentService.syncOfficialStudentsToFirebase();
+        }
+
+        // Auto-sync any newly added official students (e.g. Passout-2026 batch) to Firestore
+        const existingRegs = new Set(students.map((s) => (s.registerNumber || '').toUpperCase()));
+        const missingOfficial = OFFICIAL_ECE_STUDENTS.filter(
+          (s) => !existingRegs.has(s.registerNumber.toUpperCase())
+        );
+
+        if (missingOfficial.length > 0) {
+          console.log(`Syncing ${missingOfficial.length} missing official students to Firestore...`);
+          const nowIso = new Date().toISOString();
+          for (const std of missingOfficial) {
+            const customDocId = 'std_ece_' + std.registerNumber;
+            const docRef = doc(db, 'students', customDocId);
+            const payload = {
+              name: std.name,
+              registerNumber: std.registerNumber,
+              department: 'ECE',
+              year: std.year || '2nd',
+              phone: std.phone || '',
+              email: std.email || '',
+              createdAt: serverTimestamp(),
+              updatedAt: serverTimestamp(),
+            };
+            try {
+              await setDoc(docRef, payload, { merge: true });
+              students.push({ id: customDocId, ...payload, createdAt: nowIso, updatedAt: nowIso });
+            } catch (syncErr) {
+              console.warn(`Could not sync student ${std.registerNumber}:`, syncErr.message);
+            }
+          }
         }
 
         // Sort by register number
