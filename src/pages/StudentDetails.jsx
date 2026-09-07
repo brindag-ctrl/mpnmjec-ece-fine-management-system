@@ -86,9 +86,16 @@ export const StudentDetails = ({
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xl font-bold text-slate-900">{student.name}</h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 border border-blue-200 text-blue-700">
-                  {student.year} Year ECE
-                </span>
+                {(student.year || '').toLowerCase() === 'discontinued' ? (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 border border-amber-300 text-amber-800 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                    Discontinued Student
+                  </span>
+                ) : (
+                  <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-50 border border-blue-200 text-blue-700">
+                    {student.year} Year ECE
+                  </span>
+                )}
               </div>
 
               <div className="flex flex-wrap items-center gap-4 text-xs text-slate-600 mt-2 font-mono">

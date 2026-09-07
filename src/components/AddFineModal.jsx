@@ -208,19 +208,21 @@ export const AddFineModal = ({
 
               {/* Quick Year Filter Chips */}
               {!initialData && (
-                <div className="flex items-center gap-1 text-[11px]">
-                  {['All', '2nd', '3rd', '4th'].map((yr) => (
+                <div className="flex flex-wrap items-center gap-1 text-[11px]">
+                  {['All', '2nd', '3rd', '4th', 'Discontinued'].map((yr) => (
                     <button
                       key={yr}
                       type="button"
                       onClick={() => handleYearFilterChange(yr)}
                       className={`px-2 py-0.5 rounded-md font-semibold transition-colors ${
                         yearFilter === yr
-                          ? 'bg-blue-600 text-white shadow-2xs'
+                          ? yr === 'Discontinued'
+                            ? 'bg-amber-600 text-white shadow-2xs'
+                            : 'bg-blue-600 text-white shadow-2xs'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                       }`}
                     >
-                      {yr === 'All' ? 'All' : `${yr} Yr`}
+                      {yr === 'All' ? 'All' : yr === 'Discontinued' ? 'Discontinued' : `${yr} Yr`}
                     </button>
                   ))}
                 </div>
@@ -254,7 +256,7 @@ export const AddFineModal = ({
               ) : (
                 filteredStudents.map((s) => (
                   <option key={s.id} value={s.id}>
-                    {s.name} ({s.registerNumber}) - {s.year} Year ECE
+                    {s.name} ({s.registerNumber}) - {(s.year || '').toLowerCase() === 'discontinued' ? 'Discontinued' : `${s.year} Year ECE`}
                   </option>
                 ))
               )}
@@ -274,9 +276,15 @@ export const AddFineModal = ({
               <div className="flex items-center gap-3">
                 <div>
                   <span className="text-slate-500">Year: </span>
-                  <span className="font-semibold text-blue-800 bg-blue-100/60 px-1.5 py-0.5 rounded">
-                    {selectedStudent.year} Year
-                  </span>
+                  {(selectedStudent.year || '').toLowerCase() === 'discontinued' ? (
+                    <span className="font-bold text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded border border-amber-300">
+                      Discontinued
+                    </span>
+                  ) : (
+                    <span className="font-semibold text-blue-800 bg-blue-100/60 px-1.5 py-0.5 rounded">
+                      {selectedStudent.year} Year
+                    </span>
+                  )}
                 </div>
                 <div>
                   <span className="text-slate-500">Dept: </span>

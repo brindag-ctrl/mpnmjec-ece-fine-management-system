@@ -38,7 +38,10 @@ export const Students = ({
       std.registerNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (std.phone && std.phone.includes(searchTerm));
 
-    const matchesYear = yearFilter === 'All' || std.year === yearFilter;
+    const matchesYear =
+      yearFilter === 'All'
+        ? true
+        : (std.year || '').toLowerCase() === yearFilter.toLowerCase();
 
     return matchesSearch && matchesYear;
   });
@@ -136,6 +139,7 @@ export const Students = ({
             <option value="2nd">2nd Year ECE</option>
             <option value="3rd">3rd Year ECE</option>
             <option value="4th">4th Year ECE (Final)</option>
+            <option value="Discontinued">Discontinued Students</option>
           </select>
         </div>
       </div>
@@ -159,9 +163,9 @@ export const Students = ({
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5 w-full md:w-auto justify-end">
-            {/* Bulk Year Promotion */}
+            {/* Bulk Year Promotion / Status */}
             <div className="flex items-center gap-1.5 bg-blue-800/80 p-1 rounded-xl border border-blue-700">
-              <span className="text-[11px] font-semibold text-blue-200 pl-2">Promote Year to:</span>
+              <span className="text-[11px] font-semibold text-blue-200 pl-2">Update Status to:</span>
               <select
                 value={targetPromoteYear}
                 onChange={(e) => setTargetPromoteYear(e.target.value)}
@@ -170,6 +174,7 @@ export const Students = ({
                 <option value="2nd">2nd Year</option>
                 <option value="3rd">3rd Year</option>
                 <option value="4th">4th Year</option>
+                <option value="Discontinued">Discontinued</option>
                 <option value="Graduated">Graduated</option>
               </select>
               <button
@@ -177,7 +182,7 @@ export const Students = ({
                 className="flex items-center gap-1.5 px-3 py-1 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition-colors shadow-xs"
               >
                 <ArrowUpCircle className="w-3.5 h-3.5" />
-                <span>Promote Selected</span>
+                <span>Apply to Selected</span>
               </button>
             </div>
 
@@ -273,9 +278,16 @@ export const Students = ({
                         {student.registerNumber}
                       </td>
                       <td className="p-3.5">
-                        <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 border border-slate-200 text-slate-700">
-                          {student.year} Year
-                        </span>
+                        {(student.year || '').toLowerCase() === 'discontinued' ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 border border-amber-300 text-amber-800">
+                            <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                            Discontinued
+                          </span>
+                        ) : (
+                          <span className="px-2.5 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 border border-slate-200 text-slate-700">
+                            {student.year} Year
+                          </span>
+                        )}
                       </td>
                       <td className="p-3.5">
                         <span className="text-blue-700 font-bold">ECE</span>

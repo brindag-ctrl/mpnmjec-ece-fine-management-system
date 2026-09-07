@@ -143,10 +143,10 @@ export const AddStudentModal = ({
 
           {/* Year & Department Grid */}
           <div className="grid grid-cols-2 gap-4">
-            {/* Year */}
+            {/* Year / Status */}
             <div>
               <label className="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1.5">
-                Year of Study <span className="text-rose-500">*</span>
+                Year of Study / Status <span className="text-rose-500">*</span>
               </label>
               <select
                 value={year}
@@ -156,6 +156,7 @@ export const AddStudentModal = ({
                 <option value="2nd">2nd Year</option>
                 <option value="3rd">3rd Year</option>
                 <option value="4th">4th Year (Final)</option>
+                <option value="Discontinued">Discontinued</option>
               </select>
             </div>
 
