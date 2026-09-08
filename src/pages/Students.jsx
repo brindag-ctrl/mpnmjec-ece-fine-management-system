@@ -314,21 +314,21 @@ export const Students = ({
                       <td className="p-3.5 font-medium text-slate-900">
                         <button
                           onClick={() => onViewStudentHistory(student.id)}
-                          className="hover:text-blue-600 hover:underline text-left font-bold"
+                          className="hover:text-blue-600 hover:underline text-left font-semibold"
                         >
                           {student.name}
                         </button>
                       </td>
-                      <td className="p-3.5 font-mono text-blue-700 font-semibold">
+                      <td className="p-3.5 font-mono text-blue-700 font-medium">
                         {student.registerNumber}
                       </td>
                       <td className="p-3.5">
                         {(student.year || '').toLowerCase().includes('passout') || (student.year || '').toLowerCase().includes('passed out') ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-50 border border-purple-300 text-purple-800">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-purple-50 border border-purple-300 text-purple-800">
                             🎓 {student.year.startsWith('Passout-') ? student.year : `Passout ${student.year}`}
                           </span>
                         ) : (student.year || '').toLowerCase() === 'discontinued' ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 border border-amber-300 text-amber-800">
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-50 border border-amber-300 text-amber-800">
                             <span className="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                             Discontinued
                           </span>
@@ -339,7 +339,7 @@ export const Students = ({
                         )}
                       </td>
                       <td className="p-3.5">
-                        <span className="text-blue-700 font-bold">ECE</span>
+                        <span className="text-blue-700 font-semibold">ECE</span>
                       </td>
                       <td className="p-3.5 font-mono text-slate-500">
                         {student.phone ? (
@@ -353,11 +353,11 @@ export const Students = ({
                       </td>
                       <td className="p-3.5 text-center">
                         {fineSummary.unpaidCount > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-800 border border-amber-300">
                             {formatCurrency(fineSummary.unpaidAmount)} Pending ({fineSummary.unpaidCount})
                           </span>
                         ) : fineSummary.totalCount > 0 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-300">
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-800 border border-emerald-300">
                             Clear ({fineSummary.totalCount} fines)
                           </span>
                         ) : (

@@ -64,7 +64,7 @@ export const Spendings = ({
         {/* Treasury Available Balance */}
         <div className="p-5 rounded-2xl bg-white border border-amber-200/80 hover:border-amber-400 shadow-xs flex flex-col justify-between transition-all">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-500">
               Cash in Hand (Treasury)
             </span>
             <div className="p-3 rounded-2xl bg-amber-50 text-amber-700 border border-amber-200 shadow-2xs">
@@ -72,7 +72,7 @@ export const Spendings = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black font-mono text-slate-900">
+            <div className="text-2xl sm:text-3xl font-semibold font-mono text-slate-900">
               {formatCurrency(netTreasury)}
             </div>
             <div className="text-xs text-slate-400 font-medium mt-1">
@@ -84,7 +84,7 @@ export const Spendings = ({
         {/* Total Collected (Inflow) */}
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Total Fines Collected
             </span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
@@ -92,7 +92,7 @@ export const Spendings = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-slate-900 font-mono">
+            <div className="text-2xl sm:text-3xl font-semibold text-slate-900 font-mono">
               {formatCurrency(totalPaidFines)}
             </div>
             <div className="text-xs text-emerald-600 font-medium mt-1">
@@ -104,7 +104,7 @@ export const Spendings = ({
         {/* Total Spendings (Outflow) */}
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
               Total Spendings
             </span>
             <div className="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
@@ -112,7 +112,7 @@ export const Spendings = ({
             </div>
           </div>
           <div className="mt-3">
-            <div className="text-2xl sm:text-3xl font-black text-rose-600 font-mono">
+            <div className="text-2xl sm:text-3xl font-semibold text-rose-600 font-mono">
               {formatCurrency(totalSpent)}
             </div>
             <div className="text-xs text-slate-400 font-medium mt-1">
@@ -128,17 +128,17 @@ export const Spendings = ({
         <div className="lg:col-span-5 bg-white p-5 sm:p-6 rounded-2xl border border-slate-200 shadow-xs h-fit">
           <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-4">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-red-50 text-red-700 flex items-center justify-center font-bold">
+              <div className="w-8 h-8 rounded-lg bg-red-50 text-red-700 flex items-center justify-center font-semibold">
                 <Plus className="w-4 h-4" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-900">Add Spending</h3>
+                <h3 className="text-sm font-semibold text-slate-900">Add Spending</h3>
                 <p className="text-[11px] text-slate-500">Record a department expense</p>
               </div>
             </div>
 
             {showSuccessToast && (
-              <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 animate-fade-in">
+              <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-1 rounded-md border border-emerald-200 animate-fade-in">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 Saved!
               </span>
@@ -148,7 +148,7 @@ export const Spendings = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* 1. Item / Reason */}
             <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+              <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                 Item / Reason <span className="text-red-500">*</span>
               </label>
               <input
@@ -164,11 +164,11 @@ export const Spendings = ({
             {/* 2. Amount & Date in 2 columns */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Amount (₹) <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-xs">₹</span>
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold text-xs">₹</span>
                   <input
                     type="number"
                     required
@@ -177,13 +177,13 @@ export const Spendings = ({
                     placeholder="0"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full pl-7 pr-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600 transition-all font-mono font-bold text-slate-900"
+                    className="w-full pl-7 pr-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl focus:bg-white focus:outline-none focus:ring-2 focus:ring-red-600/20 focus:border-red-600 transition-all font-mono font-semibold text-slate-900"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1.5">Date</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1.5">Date</label>
                 <input
                   type="date"
                   required
@@ -197,7 +197,7 @@ export const Spendings = ({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-2.5 px-4 bg-red-700 hover:bg-red-800 text-white text-xs font-bold rounded-xl shadow-md shadow-red-700/20 transition-all active:scale-98 disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
+              className="w-full py-2.5 px-4 bg-red-700 hover:bg-red-800 text-white text-xs font-semibold rounded-xl shadow-md shadow-red-700/20 transition-all active:scale-98 disabled:opacity-50 mt-2 flex items-center justify-center gap-2"
             >
               <Plus className="w-4 h-4" />
               <span>{isSubmitting ? 'Saving...' : 'Add Spending'}</span>
@@ -209,7 +209,7 @@ export const Spendings = ({
         <div className="lg:col-span-7 bg-white rounded-2xl border border-slate-200 shadow-xs flex flex-col">
           <div className="p-4 sm:p-5 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
-              <h3 className="text-sm font-bold text-slate-900">Spending History</h3>
+              <h3 className="text-sm font-semibold text-slate-900">Spending History</h3>
               <p className="text-[11px] text-slate-500">Live records from cloud database</p>
             </div>
 
@@ -239,7 +239,7 @@ export const Spendings = ({
             ) : (
               <table className="w-full text-left border-collapse text-xs">
                 <thead>
-                  <tr className="bg-slate-50/75 border-b border-slate-100 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <tr className="bg-slate-50/75 border-b border-slate-100 text-[10px] font-semibold uppercase tracking-wider text-slate-400">
                     <th className="py-3 px-4">Date</th>
                     <th className="py-3 px-4">Item / Reason</th>
                     <th className="py-3 px-4 text-right">Amount</th>
@@ -255,7 +255,7 @@ export const Spendings = ({
                       <td className="py-3 px-4 font-semibold text-slate-900">
                         {item.title}
                       </td>
-                      <td className="py-3 px-4 text-right font-mono font-bold text-rose-600 whitespace-nowrap text-sm">
+                      <td className="py-3 px-4 text-right font-mono font-semibold text-rose-600 whitespace-nowrap text-sm">
                         {formatCurrency(item.amount)}
                       </td>
                       <td className="py-3 px-4 text-center">

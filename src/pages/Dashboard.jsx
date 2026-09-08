@@ -61,54 +61,54 @@ export const Dashboard = ({
     <div className="space-y-6 pb-12">
 
 
-      {/* ALL Financial Status Cards Included (6 Complete Cards) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+      {/* ALL Financial Status Cards Included (6 Cleanly Aligned Cards) */}
+      <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5">
         {/* 1. Cash in Hand / Treasury */}
         <DashboardCard
-          title="Cash in Hand (Treasury)"
+          title="Cash in Hand"
           amount={netTreasury}
           icon={Wallet}
           variant="treasury"
-          subtitle={`Collected: ${formatCurrency(financials.paidAmount)} | Spent: ${formatCurrency(totalSpent)}`}
+          subtitle="Net Treasury"
           badgeText="In Hand"
           onClick={() => onNavigate('spendings')}
         />
 
         {/* 2. Total Fine Amount */}
         <DashboardCard
-          title="Total Fine Amount"
+          title="Total Fine"
           amount={financials.totalAmount}
           count={financials.totalCount}
           countLabel="fines"
           icon={IndianRupee}
           variant="indigo"
-          subtitle={`Paid + Unpaid + Cancelled (${financials.totalCount} fines)`}
+          subtitle={`${financials.totalCount} recorded`}
           badgeText="Recorded"
           onClick={() => onNavigate('fines')}
         />
 
         {/* 3. Treasury / Collected */}
         <DashboardCard
-          title="Treasury / Collected"
+          title="Collected Fine"
           amount={financials.paidAmount}
           count={financials.paidCount}
           countLabel="paid"
           icon={Landmark}
           variant="emerald"
-          subtitle={`Deposited to Dept Treasury (${financials.paidCount} paid)`}
+          subtitle={`${financials.paidCount} cleared`}
           badgeText="Collected"
           onClick={() => onNavigate('fines')}
         />
 
         {/* 4. Department Spendings */}
         <DashboardCard
-          title="Department Spendings"
+          title="Dept Spendings"
           amount={totalSpent}
           count={spendings.length}
           countLabel="spendings"
           icon={TrendingDown}
           variant="rose"
-          subtitle={`${spendings.length} spendings logged`}
+          subtitle={`${spendings.length} entries`}
           badgeText="Spent"
           onClick={() => onNavigate('spendings')}
         />
@@ -121,7 +121,7 @@ export const Dashboard = ({
           countLabel="unpaid"
           icon={Clock}
           variant="amber"
-          subtitle={`Awaiting student clearance (${financials.unpaidCount} unpaid)`}
+          subtitle={`${financials.unpaidCount} unpaid`}
           badgeText="Pending"
           onClick={() => onNavigate('fines')}
         />
@@ -133,8 +133,8 @@ export const Dashboard = ({
           count={financials.cancelledCount}
           countLabel="cancelled"
           icon={Ban}
-          variant="rose"
-          subtitle={`Waived / Approved (${financials.cancelledCount} cancelled)`}
+          variant="slate"
+          subtitle={`${financials.cancelledCount} waived`}
           badgeText="Waived"
           onClick={() => onNavigate('fines')}
         />
@@ -148,7 +148,7 @@ export const Dashboard = ({
         >
           <div>
             <p className="text-xs text-slate-500 font-medium">Total Students</p>
-            <p className="text-xl font-bold text-slate-900 font-mono mt-0.5">{students.length}</p>
+            <p className="text-xl font-semibold text-slate-900 font-mono mt-0.5">{students.length}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-red-50 text-red-700 flex items-center justify-center">
             <Users className="w-5 h-5" />
@@ -161,7 +161,7 @@ export const Dashboard = ({
         >
           <div>
             <p className="text-xs text-emerald-700 font-medium">Paid Fines Count</p>
-            <p className="text-xl font-bold text-emerald-700 font-mono mt-0.5">{financials.paidCount}</p>
+            <p className="text-xl font-semibold text-emerald-700 font-mono mt-0.5">{financials.paidCount}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
             <CheckCircle className="w-5 h-5" />
@@ -174,7 +174,7 @@ export const Dashboard = ({
         >
           <div>
             <p className="text-xs text-amber-700 font-medium">Unpaid Fines Count</p>
-            <p className="text-xl font-bold text-amber-700 font-mono mt-0.5">{financials.unpaidCount}</p>
+            <p className="text-xl font-semibold text-amber-700 font-mono mt-0.5">{financials.unpaidCount}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
             <Clock className="w-5 h-5" />
@@ -187,7 +187,7 @@ export const Dashboard = ({
         >
           <div>
             <p className="text-xs text-rose-700 font-medium">Cancelled Fines Count</p>
-            <p className="text-xl font-bold text-rose-700 font-mono mt-0.5">{financials.cancelledCount}</p>
+            <p className="text-xl font-semibold text-rose-700 font-mono mt-0.5">{financials.cancelledCount}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
             <XCircle className="w-5 h-5" />
@@ -199,7 +199,7 @@ export const Dashboard = ({
       <div className="p-5 sm:p-6 rounded-2xl bg-white border border-slate-200 shadow-xs">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Recent Disciplinary Fine Records</h3>
+            <h3 className="text-base font-semibold text-slate-900">Recent Disciplinary Fine Records</h3>
             <p className="text-xs text-slate-500">Live records from the department database</p>
           </div>
 
@@ -212,7 +212,7 @@ export const Dashboard = ({
                   onClick={() => setFilterYear(yr)}
                   className={`px-2.5 py-1 rounded-lg transition-all ${
                     filterYear === yr
-                      ? 'bg-white text-slate-900 shadow-2xs font-bold'
+                      ? 'bg-white text-slate-900 shadow-2xs font-semibold'
                       : 'text-slate-500 hover:text-slate-900'
                   }`}
                 >
@@ -223,7 +223,7 @@ export const Dashboard = ({
 
             <button
               onClick={() => onNavigate('fines')}
-              className="text-xs font-bold text-red-700 hover:text-red-800 flex items-center gap-1 group px-3 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
+              className="text-xs font-semibold text-red-700 hover:text-red-800 flex items-center gap-1 group px-3 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
             >
               <span>View All</span>
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
@@ -258,28 +258,28 @@ export const Dashboard = ({
                     <td className="p-3.5 font-medium text-slate-900">
                       <button
                         onClick={() => onViewStudent(fine.studentId)}
-                        className="hover:text-red-700 hover:underline text-left font-bold"
+                        className="hover:text-red-700 hover:underline text-left font-semibold"
                       >
                         {fine.studentName}
                       </button>
                     </td>
-                    <td className="p-3.5 font-mono text-red-700 font-semibold">
+                    <td className="p-3.5 font-mono text-red-700 font-medium">
                       {fine.registerNumber}
                     </td>
                     <td className="p-3.5">
-                      <span className="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 border border-slate-200 text-slate-700">
+                      <span className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 border border-slate-200 text-slate-700">
                         {fine.year} Year
                       </span>
                     </td>
                     <td className="p-3.5 max-w-xs truncate text-slate-600" title={fine.reason}>
                       {fine.reason}
                     </td>
-                    <td className="p-3.5 text-right font-mono font-bold text-slate-900 text-sm">
+                    <td className="p-3.5 text-right font-mono font-semibold text-slate-900 text-sm">
                       {formatCurrency(fine.amount)}
                     </td>
                     <td className="p-3.5 text-center">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border ${
+                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-semibold border ${
                           fine.status === 'Paid'
                             ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
                             : fine.status === 'Unpaid'

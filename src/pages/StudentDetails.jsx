@@ -147,25 +147,25 @@ export const StudentDetails = ({
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-100">
           <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
             <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Total Recorded</span>
-            <p className="text-xl font-bold font-mono text-slate-900 mt-1">{formatCurrency(stats.totalFineAmount)}</p>
+            <p className="text-xl font-semibold font-mono text-slate-900 mt-1">{formatCurrency(stats.totalFineAmount)}</p>
             <p className="text-[10px] text-slate-500 mt-0.5">{stats.totalFinesCount} fines total</p>
           </div>
 
           <div className="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
             <span className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wider">Total Paid</span>
-            <p className="text-xl font-bold font-mono text-emerald-700 mt-1">{formatCurrency(stats.totalPaidAmount)}</p>
+            <p className="text-xl font-semibold font-mono text-emerald-700 mt-1">{formatCurrency(stats.totalPaidAmount)}</p>
             <p className="text-[10px] text-emerald-600 mt-0.5">Cleared to Treasury</p>
           </div>
 
           <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200">
             <span className="text-[11px] font-semibold text-amber-800 uppercase tracking-wider">Total Pending</span>
-            <p className="text-xl font-bold font-mono text-amber-700 mt-1">{formatCurrency(stats.totalPendingAmount)}</p>
+            <p className="text-xl font-semibold font-mono text-amber-700 mt-1">{formatCurrency(stats.totalPendingAmount)}</p>
             <p className="text-[10px] text-amber-600 mt-0.5">Unpaid fine balance</p>
           </div>
 
           <div className="p-3.5 rounded-xl bg-rose-50/70 border border-rose-200">
             <span className="text-[11px] font-semibold text-rose-800 uppercase tracking-wider">Total Cancelled</span>
-            <p className="text-xl font-bold font-mono text-rose-700 mt-1">{formatCurrency(stats.totalCancelledAmount)}</p>
+            <p className="text-xl font-semibold font-mono text-rose-700 mt-1">{formatCurrency(stats.totalCancelledAmount)}</p>
             <p className="text-[10px] text-rose-600 mt-0.5">Waived by HOD</p>
           </div>
         </div>
@@ -175,10 +175,10 @@ export const StudentDetails = ({
       <div className="rounded-2xl bg-white border border-slate-200 shadow-xs overflow-hidden">
         <div className="p-4 border-b border-slate-100 flex items-center justify-between">
           <div>
-            <h3 className="text-sm font-bold text-slate-900">Department Fine Timeline & History</h3>
+            <h3 className="text-sm font-semibold text-slate-900">Department Fine Timeline & History</h3>
             <p className="text-xs text-slate-500">Complete historical records for {student.name}</p>
           </div>
-          <span className="text-xs font-mono text-blue-700 font-bold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
+          <span className="text-xs font-mono text-blue-700 font-semibold bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200">
             {studentFines.length} records found
           </span>
         </div>
@@ -217,7 +217,7 @@ export const StudentDetails = ({
                       <p>{fine.reason}</p>
                       <p className="text-[10px] text-slate-400 font-mono mt-0.5">ID: {fine.id}</p>
                     </td>
-                    <td className="p-3.5 text-right font-mono font-bold text-slate-900 text-sm">
+                    <td className="p-3.5 text-right font-mono font-semibold text-slate-900 text-sm">
                       {formatCurrency(fine.amount)}
                     </td>
                     <td className="p-3.5 text-center">

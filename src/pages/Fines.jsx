@@ -218,12 +218,12 @@ export const Fines = ({
                     <td className="p-3.5 font-medium text-slate-900">
                       <button
                         onClick={() => onViewStudentHistory(fine.studentId)}
-                        className="hover:text-blue-600 hover:underline font-bold text-left"
+                        className="hover:text-blue-600 hover:underline font-semibold text-left"
                       >
                         {fine.studentName}
                       </button>
                     </td>
-                    <td className="p-3.5 font-mono text-blue-700 font-semibold">
+                    <td className="p-3.5 font-mono text-blue-700 font-medium">
                       {fine.registerNumber}
                     </td>
                     <td className="p-3.5">
@@ -231,13 +231,13 @@ export const Fines = ({
                         {fine.year} Year
                       </span>
                     </td>
-                    <td className="p-3.5 font-bold text-blue-700">
+                    <td className="p-3.5 font-semibold text-blue-700">
                       ECE
                     </td>
                     <td className="p-3.5 max-w-xs truncate text-slate-600" title={fine.reason}>
                       {fine.reason}
                     </td>
-                    <td className="p-3.5 text-right font-mono font-bold text-slate-900 text-sm">
+                    <td className="p-3.5 text-right font-mono font-semibold text-slate-900 text-sm">
                       {formatCurrency(fine.amount)}
                     </td>
                     <td className="p-3.5 text-center">
