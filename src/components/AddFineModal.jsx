@@ -122,6 +122,7 @@ export const AddFineModal = ({
         amount: numAmount,
         status: status,
         remarks: remarks.trim(),
+        academicYear: initialData?.academicYear || '2025-2026',
       };
 
       await onSubmit(finePayload, initialData?.id);

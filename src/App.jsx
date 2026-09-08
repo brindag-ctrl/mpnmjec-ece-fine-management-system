@@ -4,6 +4,7 @@ import { useToast } from './components/Toast';
 import { studentService } from './services/studentService';
 import { fineService } from './services/fineService';
 import { spendingService } from './services/spendingService';
+import { academicYearService } from './services/academicYearService';
 
 // Layout & Components
 import { Sidebar } from './components/Sidebar';
@@ -34,6 +35,8 @@ export const App = () => {
   const [students, setStudents] = useState([]);
   const [fines, setFines] = useState([]);
   const [spendings, setSpendings] = useState([]);
+  const [academicYears, setAcademicYears] = useState([]);
+  const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025-2026');
   const [dataLoading, setDataLoading] = useState(true);
 
   // Modal States
@@ -59,14 +62,16 @@ export const App = () => {
   const loadAllData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const [fetchedStudents, fetchedFines, fetchedSpendings] = await Promise.all([
+      const [fetchedStudents, fetchedFines, fetchedSpendings, fetchedAcademicYears] = await Promise.all([
         studentService.getAllStudents(),
         fineService.getAllFines(),
         spendingService.getAllSpendings(),
+        academicYearService.getAllAcademicYears(),
       ]);
       setStudents(fetchedStudents);
       setFines(fetchedFines);
       setSpendings(fetchedSpendings);
+      setAcademicYears(fetchedAcademicYears);
     } catch (err) {
       console.error('Error fetching data:', err);
       toast.error('Failed to load department records: ' + err.message);
@@ -130,6 +135,43 @@ export const App = () => {
     } catch (err) {
       toast.error('Failed to update student status: ' + err.message);
     }
+  };
+
+  const handlePromoteAllBatches = () => {
+    setConfirmModal({
+      isOpen: true,
+      title: 'Promote All Batches to Next Academic Year (+1 Year)',
+      message: 'Are you sure you want to promote all active batches for the new academic year?\n• 2nd Year students will become 3rd Year\n• 3rd Year students will become 4th Year\n• 4th Year students will graduate to Passout-2027\n\n(Discontinued and past alumni records will remain unchanged).',
+      confirmText: 'Yes, Promote All Batches',
+      type: 'warning',
+      onConfirm: async () => {
+        try {
+          const stepUp = (yr) => {
+            const lower = (yr || '').toLowerCase();
+            if (lower === '2nd' || lower === '2') return '3rd';
+            if (lower === '3rd' || lower === '3') return '4th';
+            if (lower === '4th' || lower === '4') return 'Passout-2027';
+            return yr;
+          };
+
+          const activeStudents = students.filter((s) => {
+            const yr = (s.year || '').toLowerCase();
+            return yr === '2nd' || yr === '3rd' || yr === '4th' || yr === '2' || yr === '3' || yr === '4';
+          });
+
+          await Promise.all(
+            activeStudents.map((s) => studentService.updateStudent(s.id, { year: stepUp(s.year) }))
+          );
+
+          setStudents((prev) => prev.map((s) => ({ ...s, year: stepUp(s.year) })));
+          toast.success(`🎉 Successfully promoted all ${activeStudents.length} active students (+1 Year) for the new academic year!`);
+        } catch (err) {
+          toast.error('Failed to promote batches: ' + err.message);
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
   };
 
   const handleBulkDemoteStudents = (studentIds) => {
@@ -361,6 +403,9 @@ export const App = () => {
         {/* Top Header */}
         <Header
           onOpenMobileMenu={() => setMobileSidebarOpen(true)}
+          academicYears={academicYears}
+          selectedAcademicYear={selectedAcademicYear}
+          onSelectAcademicYear={setSelectedAcademicYear}
           onOpenAddFine={() => {
             setEditingFine(null);
             setFineDefaultStudentId(null);
@@ -386,6 +431,9 @@ export const App = () => {
                   students={students}
                   fines={fines}
                   spendings={spendings}
+                  academicYears={academicYears}
+                  selectedAcademicYear={selectedAcademicYear}
+                  onSelectAcademicYear={setSelectedAcademicYear}
                   onOpenAddFine={() => {
                     setEditingFine(null);
                     setFineDefaultStudentId(null);
@@ -414,6 +462,7 @@ export const App = () => {
                   onDeleteStudent={handleDeleteStudent}
                   onViewStudentHistory={handleViewStudentProfile}
                   onAddFineForStudent={handleOpenAddFineForStudent}
+                  onPromoteAllBatches={handlePromoteAllBatches}
                   onBulkPromoteStudents={handleBulkPromoteStudents}
                   onBulkDemoteStudents={handleBulkDemoteStudents}
                   onBulkDeleteStudents={handleBulkDeleteStudents}
@@ -456,7 +505,7 @@ export const App = () => {
                   spendings={spendings}
                   onAddSpending={handleAddSpending}
                   onDeleteSpending={handleDeleteSpending}
-                  totalPaidFines={fines.filter(f => f.status === 'Paid').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0)}
+                  totalPaidFines={33150 + fines.filter(f => f.status === 'Paid').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0)}
                 />
               )}
             </>

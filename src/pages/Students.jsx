@@ -14,6 +14,7 @@ import {
   CheckSquare,
   Square,
   AlertTriangle,
+  GraduationCap
 } from 'lucide-react';
 import { formatCurrency } from '../utils/calculations';
 
@@ -25,6 +26,7 @@ export const Students = ({
   onDeleteStudent,
   onViewStudentHistory,
   onAddFineForStudent,
+  onPromoteAllBatches,
   onBulkPromoteStudents,
   onBulkDemoteStudents,
   onBulkDeleteStudents,
@@ -123,13 +125,24 @@ export const Students = ({
           </p>
         </div>
 
-        <button
-          onClick={onOpenAddStudent}
-          className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-500/20 transition-all self-start sm:self-auto"
-        >
-          <UserPlus className="w-4 h-4" />
-          <span>Register Student</span>
-        </button>
+        <div className="flex items-center gap-2 self-start sm:self-auto">
+          <button
+            onClick={onPromoteAllBatches}
+            title="Promote all batches to the next year (2nd->3rd, 3rd->4th, 4th->Passout-2027)"
+            className="flex items-center gap-1.5 px-3.5 py-2.5 bg-purple-50 hover:bg-purple-100 text-purple-800 border border-purple-200 text-xs font-semibold rounded-xl shadow-2xs transition-all active:scale-95 cursor-pointer"
+          >
+            <GraduationCap className="w-4 h-4 text-purple-700" />
+            <span>Promote Batches (+1 Yr)</span>
+          </button>
+
+          <button
+            onClick={onOpenAddStudent}
+            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-md shadow-blue-500/20 transition-all cursor-pointer active:scale-95"
+          >
+            <UserPlus className="w-4 h-4" />
+            <span>Register Student</span>
+          </button>
+        </div>
       </div>
 
       {/* Search and Filters Bar */}

@@ -1760,6 +1760,24 @@ export const OFFICIAL_UNIFORM_DISCIPLINE_AUG26_FINES = [
   { id: 'fine_uniform_aug26_s5_19', studentId: 'std_ece_731724106017', studentName: 'MEGAVARNAN D', registerNumber: '731724106017', department: 'ECE', year: '3rd', reason: 'Not proper wearing fine', amount: 20, status: 'Paid', remarks: '18/08/2026 Ledger Sheet 5', paidAt: '2026-08-18T10:00:00.000Z', createdAt: '2026-08-18T10:00:00.000Z' },
 ];
 
+export const OFFICIAL_AY2024_2025_FINES = [
+  {
+    id: 'fine_ay2024_2025_yasmine_pending',
+    studentId: 'std_ece_731722106052',
+    studentName: 'YASMINE S',
+    registerNumber: '731722106052',
+    department: 'ECE',
+    year: 'Passout-2026',
+    reason: 'AY 2024-2025 Annual Disciplinary Fine (Carry Forward)',
+    amount: 100,
+    status: 'Unpaid',
+    remarks: 'Pending fine from AY 2024-2025 Ledger',
+    academicYear: '2024-2025',
+    paidAt: null,
+    createdAt: '2025-05-15T10:00:00.000Z',
+  }
+];
+
 export const ALL_OFFICIAL_LEDGER_FINES = [
   ...OFFICIAL_LEDGER_4TH_YEAR_FINES,
   ...OFFICIAL_LEDGER_PASSOUT_2026_FINES,
@@ -1770,6 +1788,7 @@ export const ALL_OFFICIAL_LEDGER_FINES = [
   ...OFFICIAL_LEDGER_EVEN_LATEST_8SHEETS_FINES,
   ...OFFICIAL_APOLOGY_SEP26_FINES,
   ...OFFICIAL_UNIFORM_DISCIPLINE_AUG26_FINES,
+  ...OFFICIAL_AY2024_2025_FINES,
 ];
 
 export const fineService = {
