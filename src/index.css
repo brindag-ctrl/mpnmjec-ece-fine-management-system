@@ -91,24 +91,41 @@
   transform: translateY(-2px);
 }
 
-/* Print Styles for Official Receipt */
+/* Print Styles for Official Receipt Voucher PDF Export */
 @media print {
+  @page {
+    size: auto;
+    margin: 10mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
   body * {
     visibility: hidden;
   }
-  #printable-receipt, #printable-receipt * {
+
+  #printable-receipt,
+  #printable-receipt * {
     visibility: visible;
   }
+
   #printable-receipt {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 24px;
+    position: fixed;
+    left: 50%;
+    top: 20px;
+    transform: translateX(-50%);
+    width: 100% !important;
+    max-width: 580px !important;
+    margin: 0 auto !important;
+    padding: 24px !important;
     background: white !important;
-    color: black !important;
-    border: none !important;
+    color: #000 !important;
+    border: 2px solid #000 !important;
     box-shadow: none !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }
