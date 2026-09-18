@@ -149,3 +149,43 @@ export const numberToWords = (num) => {
 
   return result.trim() + ' Only';
 };
+
+export const calculateIncomeFinancials = (incomes = []) => {
+  let totalAmount = 0;
+  const paymentModeBreakdown = {};
+
+  incomes.forEach((inc) => {
+    const amount = Number(inc.amount) || 0;
+    totalAmount += amount;
+
+    const mode = inc.paymentMode || 'Cash';
+    paymentModeBreakdown[mode] = (paymentModeBreakdown[mode] || 0) + amount;
+  });
+
+  const round2 = (num) => Math.round((Number(num) || 0) * 100) / 100;
+
+  return {
+    totalAmount: round2(totalAmount),
+    totalCount: incomes.length,
+    paymentModeBreakdown,
+  };
+};
+
+export const calculateTreasuryFinancials = ({ fines = [], incomes = [], spendings = [], openingBalance = 0 }) => {
+  const fineStats = calculateFinancials(fines);
+  const incomeStats = calculateIncomeFinancials(incomes);
+  const totalSpent = spendings.reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
+
+  const totalInflow = fineStats.paidAmount + incomeStats.totalAmount;
+  const netTreasury = openingBalance + totalInflow - totalSpent;
+
+  return {
+    fineStats,
+    incomeStats,
+    totalSpent,
+    totalInflow,
+    openingBalance,
+    netTreasury,
+  };
+};
+

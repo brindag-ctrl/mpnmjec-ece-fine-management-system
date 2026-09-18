@@ -4,6 +4,7 @@ import { useToast } from './components/Toast';
 import { studentService } from './services/studentService';
 import { fineService } from './services/fineService';
 import { spendingService } from './services/spendingService';
+import { incomeService } from './services/incomeService';
 import { academicYearService } from './services/academicYearService';
 
 // Layout & Components
@@ -11,8 +12,10 @@ import { Sidebar } from './components/Sidebar';
 import { Header } from './components/Header';
 import { AddFineModal } from './components/AddFineModal';
 import { AddStudentModal } from './components/AddStudentModal';
+import { AddIncomeModal } from './components/AddIncomeModal';
 import { ConfirmationModal } from './components/ConfirmationModal';
 import { ReceiptModal } from './components/ReceiptModal';
+import { IncomeReceiptModal } from './components/IncomeReceiptModal';
 
 // Pages
 import { Login } from './pages/Login';
@@ -20,6 +23,7 @@ import { Dashboard } from './pages/Dashboard';
 import { Students } from './pages/Students';
 import { StudentDetails } from './pages/StudentDetails';
 import { Fines } from './pages/Fines';
+import { Incomes } from './pages/Incomes';
 import { Spendings } from './pages/Spendings';
 
 export const App = () => {
@@ -35,6 +39,7 @@ export const App = () => {
   const [students, setStudents] = useState([]);
   const [fines, setFines] = useState([]);
   const [spendings, setSpendings] = useState([]);
+  const [incomes, setIncomes] = useState([]);
   const [academicYears, setAcademicYears] = useState([]);
   const [selectedAcademicYear, setSelectedAcademicYear] = useState('2025-2026');
   const [dataLoading, setDataLoading] = useState(true);
@@ -46,6 +51,10 @@ export const App = () => {
 
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
+
+  const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
+  const [editingIncome, setEditingIncome] = useState(null);
+  const [receiptModalIncome, setReceiptModalIncome] = useState(null);
 
   const [confirmModal, setConfirmModal] = useState({
     isOpen: false,
@@ -62,15 +71,17 @@ export const App = () => {
   const loadAllData = useCallback(async () => {
     setDataLoading(true);
     try {
-      const [fetchedStudents, fetchedFines, fetchedSpendings, fetchedAcademicYears] = await Promise.all([
+      const [fetchedStudents, fetchedFines, fetchedSpendings, fetchedIncomes, fetchedAcademicYears] = await Promise.all([
         studentService.getAllStudents(),
         fineService.getAllFines(),
         spendingService.getAllSpendings(),
+        incomeService.getAllIncomes(),
         academicYearService.getAllAcademicYears(),
       ]);
       setStudents(fetchedStudents);
       setFines(fetchedFines);
       setSpendings(fetchedSpendings);
+      setIncomes(fetchedIncomes);
       setAcademicYears(fetchedAcademicYears);
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -344,6 +355,40 @@ export const App = () => {
     });
   };
 
+  // --- Income Actions ---
+  const handleSaveIncome = async (incomeData, incomeId = null) => {
+    if (incomeId) {
+      const updated = await incomeService.updateIncome(incomeId, incomeData);
+      setIncomes((prev) => prev.map((i) => (i.id === incomeId ? { ...i, ...updated } : i)));
+      toast.success(`Department income "${incomeData.title}" updated successfully.`);
+    } else {
+      const created = await incomeService.addIncome(incomeData);
+      setIncomes((prev) => [created, ...prev]);
+      toast.success(`Income of ₹${incomeData.amount} recorded successfully.`);
+    }
+  };
+
+  const handleDeleteIncome = (income) => {
+    setConfirmModal({
+      isOpen: true,
+      title: `Delete Income Record: ${income.title}`,
+      message: `Are you sure you want to permanently delete this income record of ₹${income.amount}? This will adjust the department treasury.`,
+      confirmText: 'Delete Income',
+      type: 'danger',
+      onConfirm: async () => {
+        try {
+          await incomeService.deleteIncome(income.id);
+          setIncomes((prev) => prev.filter((i) => i.id !== income.id));
+          toast.success('Income record removed.');
+        } catch (err) {
+          toast.error('Failed to delete income: ' + err.message);
+        } finally {
+          setConfirmModal((prev) => ({ ...prev, isOpen: false }));
+        }
+      },
+    });
+  };
+
   // Navigation Helpers
   const handleViewStudentProfile = (studentId) => {
     setViewingStudentId(studentId);
@@ -431,6 +476,7 @@ export const App = () => {
                   students={students}
                   fines={fines}
                   spendings={spendings}
+                  incomes={incomes}
                   academicYears={academicYears}
                   selectedAcademicYear={selectedAcademicYear}
                   onSelectAcademicYear={setSelectedAcademicYear}
@@ -438,6 +484,10 @@ export const App = () => {
                     setEditingFine(null);
                     setFineDefaultStudentId(null);
                     setIsAddFineOpen(true);
+                  }}
+                  onOpenAddIncome={() => {
+                    setEditingIncome(null);
+                    setIsAddIncomeOpen(true);
                   }}
                   onOpenAddStudent={() => {
                     setEditingStudent(null);
@@ -500,12 +550,33 @@ export const App = () => {
                 />
               )}
 
+              {currentPage === 'incomes' && (
+                <Incomes
+                  incomes={incomes}
+                  fines={fines}
+                  spendings={spendings}
+                  selectedAcademicYear={selectedAcademicYear}
+                  onSelectAcademicYear={setSelectedAcademicYear}
+                  onOpenAddIncome={() => {
+                    setEditingIncome(null);
+                    setIsAddIncomeOpen(true);
+                  }}
+                  onEditIncome={(income) => {
+                    setEditingIncome(income);
+                    setIsAddIncomeOpen(true);
+                  }}
+                  onDeleteIncome={handleDeleteIncome}
+                  onOpenReceipt={(income) => setReceiptModalIncome(income)}
+                />
+              )}
+
               {currentPage === 'spendings' && (
                 <Spendings
                   spendings={spendings}
                   onAddSpending={handleAddSpending}
                   onDeleteSpending={handleDeleteSpending}
                   totalPaidFines={33150 + fines.filter(f => f.status === 'Paid').reduce((sum, f) => sum + (parseFloat(f.amount) || 0), 0)}
+                  totalOtherIncomes={incomes.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0)}
                 />
               )}
             </>
@@ -530,6 +601,18 @@ export const App = () => {
         initialData={editingStudent}
       />
 
+      <AddIncomeModal
+        isOpen={isAddIncomeOpen}
+        onClose={() => {
+          setIsAddIncomeOpen(false);
+          setEditingIncome(null);
+        }}
+        onSave={handleSaveIncome}
+        editingIncome={editingIncome}
+        academicYears={academicYears}
+        currentAcademicYear={selectedAcademicYear}
+      />
+
       <ConfirmationModal
         isOpen={confirmModal.isOpen}
         onClose={() => setConfirmModal((prev) => ({ ...prev, isOpen: false }))}
@@ -544,6 +627,12 @@ export const App = () => {
         isOpen={!!receiptModalFine}
         onClose={() => setReceiptModalFine(null)}
         fine={receiptModalFine}
+      />
+
+      <IncomeReceiptModal
+        isOpen={!!receiptModalIncome}
+        onClose={() => setReceiptModalIncome(null)}
+        income={receiptModalIncome}
       />
     </div>
   );

@@ -29,10 +29,12 @@ export const Dashboard = ({
   students = [],
   fines = [],
   spendings = [],
+  incomes = [],
   academicYears = [],
   selectedAcademicYear = '2025-2026',
   onSelectAcademicYear,
   onOpenAddFine,
+  onOpenAddIncome,
   onOpenAddStudent,
   onNavigate,
   onViewStudent,
@@ -43,6 +45,14 @@ export const Dashboard = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   const liveFinancials = calculateFinancials(fines);
+  
+  // Year-filtered live incomes
+  const filteredIncomes = incomes.filter((i) => {
+    if (selectedAcademicYear === 'ALL') return true;
+    return i.academicYear === selectedAcademicYear;
+  });
+  const liveIncomeFinancials = filteredIncomes.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+
   const totalSpent = spendings.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
 
   // Consolidated AY 2024-2025 Historical Data (With YASMINE S ₹100 pending)
@@ -56,17 +66,20 @@ export const Dashboard = ({
     unpaidCount: 1, // 1 pending fine: YASMINE S
     cancelledCount: 0,
     totalSpent: 0,
+    totalIncome: 0,
     netTreasury: 33150,
   };
 
   // Year-by-Year Cumulative Rollover Balance
   const AY_2024_2025_CLOSING_TREASURY = 33150;
-  const AY_2025_2026_CUMULATIVE_TREASURY = AY_2024_2025_CLOSING_TREASURY + liveFinancials.paidAmount - totalSpent;
+  const AY_2025_2026_CUMULATIVE_TREASURY = AY_2024_2025_CLOSING_TREASURY + liveFinancials.paidAmount + liveIncomeFinancials - totalSpent;
 
   // Calculate dynamic financials according to selected Academic Year
   let displayFinancials = {
     ...liveFinancials,
+    totalIncome: liveIncomeFinancials,
     totalSpent,
+    totalInflow: liveFinancials.paidAmount + liveIncomeFinancials,
     netTreasury: AY_2025_2026_CUMULATIVE_TREASURY, // Cash in hand rolled over from AY 2024-2025
     treasurySubtitle: `Incl. ${formatCurrency(AY_2024_2025_CLOSING_TREASURY)} Rollover`,
   };
@@ -74,9 +87,12 @@ export const Dashboard = ({
   if (selectedAcademicYear === '2024-2025') {
     displayFinancials = {
       ...AY_2024_2025_DATA,
+      totalIncome: 0,
+      totalInflow: AY_2024_2025_DATA.paidAmount,
       treasurySubtitle: 'AY 24-25 Treasury',
     };
   } else if (selectedAcademicYear === 'ALL') {
+    const allTimeInflow = liveFinancials.paidAmount + liveIncomeFinancials + AY_2024_2025_DATA.paidAmount;
     displayFinancials = {
       totalAmount: liveFinancials.totalAmount + AY_2024_2025_DATA.totalAmount,
       paidAmount: liveFinancials.paidAmount + AY_2024_2025_DATA.paidAmount,
@@ -86,7 +102,9 @@ export const Dashboard = ({
       paidCount: liveFinancials.paidCount + AY_2024_2025_DATA.paidCount,
       unpaidCount: liveFinancials.unpaidCount + AY_2024_2025_DATA.unpaidCount,
       cancelledCount: liveFinancials.cancelledCount + AY_2024_2025_DATA.cancelledCount,
+      totalIncome: liveIncomeFinancials,
       totalSpent,
+      totalInflow: allTimeInflow,
       netTreasury: AY_2025_2026_CUMULATIVE_TREASURY,
       treasurySubtitle: 'All-Time In Hand',
     };
@@ -100,7 +118,9 @@ export const Dashboard = ({
       paidCount: 0,
       unpaidCount: 0,
       cancelledCount: 0,
+      totalIncome: 0,
       totalSpent: 0,
+      totalInflow: 0,
       netTreasury: AY_2025_2026_CUMULATIVE_TREASURY, // Opening balance rolled over from AY 2025-2026
       treasurySubtitle: `Opening Rollover: ${formatCurrency(AY_2025_2026_CUMULATIVE_TREASURY)}`,
     };
@@ -308,8 +328,39 @@ export const Dashboard = ({
         />
       </div>
 
-      {/* Secondary Quick Counters Ribbon (All 4 Included) */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      {/* Action Strip: Quick Add Modals */}
+      <div className="flex flex-wrap items-center justify-between gap-3 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
+          <Sparkles className="w-4 h-4 text-amber-600" />
+          <span>Quick Department Operations:</span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <button
+            onClick={onOpenAddFine}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-red-700 hover:bg-red-800 rounded-xl shadow-2xs transition-all active:scale-95"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Add Fine</span>
+          </button>
+          <button
+            onClick={onOpenAddIncome}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-white bg-emerald-700 hover:bg-emerald-800 rounded-xl shadow-2xs transition-all active:scale-95"
+          >
+            <Coins className="w-3.5 h-3.5" />
+            <span>Add Dept Income</span>
+          </button>
+          <button
+            onClick={onOpenAddStudent}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-slate-700 bg-white hover:bg-slate-100 border border-slate-200 rounded-xl shadow-2xs transition-all active:scale-95"
+          >
+            <Users className="w-3.5 h-3.5 text-slate-500" />
+            <span>Register Student</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Secondary Quick Counters Ribbon (5 Clean KPI Cards) */}
+      <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div 
           onClick={() => onNavigate('students')}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-red-400 hover:shadow-xs cursor-pointer transition-all flex items-center justify-between"
@@ -324,14 +375,27 @@ export const Dashboard = ({
         </div>
 
         <div 
-          onClick={() => onNavigate('fines')}
+          onClick={() => onNavigate('incomes')}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-emerald-400 hover:shadow-xs cursor-pointer transition-all flex items-center justify-between"
         >
           <div>
-            <p className="text-xs text-emerald-700 font-medium">Paid Fines Count</p>
-            <p className="text-xl font-semibold text-emerald-700 font-mono mt-0.5">{displayFinancials.paidCount}</p>
+            <p className="text-xs text-emerald-700 font-medium">Other Incomes</p>
+            <p className="text-xl font-semibold text-emerald-700 font-mono mt-0.5">{formatCurrency(displayFinancials.totalIncome || 0)}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
+            <Coins className="w-5 h-5" />
+          </div>
+        </div>
+
+        <div 
+          onClick={() => onNavigate('fines')}
+          className="p-4 rounded-xl bg-white border border-slate-200 hover:border-blue-400 hover:shadow-xs cursor-pointer transition-all flex items-center justify-between"
+        >
+          <div>
+            <p className="text-xs text-blue-700 font-medium">Paid Fines</p>
+            <p className="text-xl font-semibold text-blue-700 font-mono mt-0.5">{displayFinancials.paidCount}</p>
+          </div>
+          <div className="w-9 h-9 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
             <CheckCircle className="w-5 h-5" />
           </div>
         </div>
@@ -341,7 +405,7 @@ export const Dashboard = ({
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-amber-400 hover:shadow-xs cursor-pointer transition-all flex items-center justify-between"
         >
           <div>
-            <p className="text-xs text-amber-700 font-medium">Unpaid Fines Count</p>
+            <p className="text-xs text-amber-700 font-medium">Unpaid Fines</p>
             <p className="text-xl font-semibold text-amber-700 font-mono mt-0.5">{displayFinancials.unpaidCount}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
@@ -350,15 +414,15 @@ export const Dashboard = ({
         </div>
 
         <div 
-          onClick={() => onNavigate('fines')}
+          onClick={() => onNavigate('spendings')}
           className="p-4 rounded-xl bg-white border border-slate-200 hover:border-rose-400 hover:shadow-xs cursor-pointer transition-all flex items-center justify-between"
         >
           <div>
-            <p className="text-xs text-rose-700 font-medium">Cancelled Fines Count</p>
-            <p className="text-xl font-semibold text-rose-700 font-mono mt-0.5">{displayFinancials.cancelledCount}</p>
+            <p className="text-xs text-rose-700 font-medium">Spendings</p>
+            <p className="text-xl font-semibold text-rose-700 font-mono mt-0.5">{formatCurrency(displayFinancials.totalSpent || 0)}</p>
           </div>
           <div className="w-9 h-9 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center">
-            <XCircle className="w-5 h-5" />
+            <TrendingDown className="w-5 h-5" />
           </div>
         </div>
       </div>

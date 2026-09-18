@@ -3,7 +3,8 @@ import {
   LayoutDashboard, 
   Users, 
   Receipt, 
-  TrendingDown,
+  Coins,
+  TrendingDown, 
   LogOut, 
   ShieldCheck,
   X
@@ -18,6 +19,7 @@ export const Sidebar = ({ currentPage, onNavigate, mobileOpen, onCloseMobile }) 
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'students', label: 'Students', icon: Users },
     { id: 'fines', label: 'Fine Management', icon: Receipt },
+    { id: 'incomes', label: 'Department Incomes', icon: Coins },
     { id: 'spendings', label: 'Spendings & Treasury', icon: TrendingDown },
   ];
 

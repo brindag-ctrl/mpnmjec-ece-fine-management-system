@@ -15,7 +15,8 @@ export const Spendings = ({
   spendings = [], 
   onAddSpending, 
   onDeleteSpending, 
-  totalPaidFines = 0 
+  totalPaidFines = 0,
+  totalOtherIncomes = 0,
 }) => {
   const [title, setTitle] = useState('');
   const [amount, setAmount] = useState('');
@@ -25,7 +26,8 @@ export const Spendings = ({
   const [showSuccessToast, setShowSuccessToast] = useState(false);
 
   const totalSpent = spendings.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
-  const netTreasury = totalPaidFines - totalSpent;
+  const totalInflow = totalPaidFines + totalOtherIncomes;
+  const netTreasury = totalInflow - totalSpent;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -85,7 +87,7 @@ export const Spendings = ({
         <div className="p-5 rounded-2xl bg-white border border-slate-200 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-              Total Fines Collected
+              Total Inflow (Fines + Incomes)
             </span>
             <div className="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <IndianRupee className="w-4 h-4" />
@@ -93,10 +95,10 @@ export const Spendings = ({
           </div>
           <div className="mt-3">
             <div className="text-2xl sm:text-3xl font-semibold text-slate-900 font-mono">
-              {formatCurrency(totalPaidFines)}
+              {formatCurrency(totalInflow)}
             </div>
             <div className="text-xs text-emerald-600 font-medium mt-1">
-              Collected from paid fines
+              Fines ({formatCurrency(totalPaidFines)}) + Incomes ({formatCurrency(totalOtherIncomes)})
             </div>
           </div>
         </div>
