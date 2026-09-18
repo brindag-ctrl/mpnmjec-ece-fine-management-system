@@ -1,13 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X, Plus, Edit2, Coins, IndianRupee } from 'lucide-react';
 
-const PAYMENT_MODES = [
-  'Cash',
-  'UPI / Online',
-  'Bank Transfer',
-  'Cheque'
-];
-
 export const AddIncomeModal = ({
   isOpen,
   onClose,
@@ -20,8 +13,6 @@ export const AddIncomeModal = ({
   const [source, setSource] = useState('');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
   const [academicYear, setAcademicYear] = useState(currentAcademicYear);
-  const [paymentMode, setPaymentMode] = useState('Cash');
-  const [referenceNumber, setReferenceNumber] = useState('');
   const [receivedBy, setReceivedBy] = useState('ECE Staff Coordinator');
   const [remarks, setRemarks] = useState('');
   const [loading, setLoading] = useState(false);
@@ -34,8 +25,6 @@ export const AddIncomeModal = ({
       setSource(editingIncome.source || '');
       setDate(editingIncome.date || new Date().toISOString().split('T')[0]);
       setAcademicYear(editingIncome.academicYear || currentAcademicYear);
-      setPaymentMode(editingIncome.paymentMode || 'Cash');
-      setReferenceNumber(editingIncome.referenceNumber || '');
       setReceivedBy(editingIncome.receivedBy || 'ECE Staff Coordinator');
       setRemarks(editingIncome.remarks || '');
     } else {
@@ -44,8 +33,6 @@ export const AddIncomeModal = ({
       setSource('');
       setDate(new Date().toISOString().split('T')[0]);
       setAcademicYear(currentAcademicYear === 'ALL' ? '2025-2026' : currentAcademicYear);
-      setPaymentMode('Cash');
-      setReferenceNumber('');
       setReceivedBy('ECE Staff Coordinator');
       setRemarks('');
     }
@@ -77,8 +64,6 @@ export const AddIncomeModal = ({
         source: source.trim() || 'ECE Department',
         date: date || new Date().toISOString().split('T')[0],
         academicYear,
-        paymentMode,
-        referenceNumber: referenceNumber.trim(),
         receivedBy: receivedBy.trim() || 'ECE Staff Coordinator',
         remarks: remarks.trim(),
       }, editingIncome?.id);
@@ -104,7 +89,7 @@ export const AddIncomeModal = ({
                 {editingIncome ? 'Edit Department Income' : 'Add Department Income'}
               </h2>
               <p className="text-xs text-slate-500">
-                Record general department funds, event income, donations, and other inflows
+                Record department funds, event revenue, sponsorships, and donations
               </p>
             </div>
           </div>
@@ -201,39 +186,6 @@ export const AddIncomeModal = ({
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all text-slate-900"
-              />
-            </div>
-          </div>
-
-          {/* Payment Mode & Reference No */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Payment Mode
-              </label>
-              <select
-                value={paymentMode}
-                onChange={(e) => setPaymentMode(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all text-slate-900"
-              >
-                {PAYMENT_MODES.map((mode) => (
-                  <option key={mode} value={mode}>
-                    {mode}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">
-                Transaction / Ref / Cheque No
-              </label>
-              <input
-                type="text"
-                value={referenceNumber}
-                onChange={(e) => setReferenceNumber(e.target.value)}
-                placeholder="e.g. UPI-123456 or CHQ-987"
-                className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all text-slate-900"
               />
             </div>
           </div>

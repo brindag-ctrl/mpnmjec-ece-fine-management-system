@@ -7,17 +7,15 @@ import {
   Trash2, 
   Edit2, 
   Printer, 
-  Landmark, 
   Download,
-  CreditCard,
-  Receipt
+  FileCheck,
+  TrendingUp,
+  UserCheck
 } from 'lucide-react';
 import { formatCurrency, formatDate, calculateIncomeFinancials } from '../utils/calculations';
 
 export const Incomes = ({
   incomes = [],
-  fines = [],
-  spendings = [],
   selectedAcademicYear = '2025-2026',
   onSelectAcademicYear,
   onOpenAddIncome,
@@ -26,7 +24,6 @@ export const Incomes = ({
   onOpenReceipt,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedPaymentMode, setSelectedPaymentMode] = useState('ALL');
 
   // Filter incomes by Academic Year
   const yearFilteredIncomes = incomes.filter((item) => {
@@ -36,38 +33,25 @@ export const Incomes = ({
 
   // Calculate stats for current filter
   const stats = calculateIncomeFinancials(yearFilteredIncomes);
+  const avgIncome = stats.totalCount > 0 ? stats.totalAmount / stats.totalCount : 0;
 
-  // Calculate payment mode breakdowns for department incomes
-  const cashIncomes = yearFilteredIncomes
-    .filter((item) => (item.paymentMode || 'Cash') === 'Cash')
-    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
-  const digitalIncomes = yearFilteredIncomes
-    .filter((item) => (item.paymentMode || 'Cash') !== 'Cash')
-    .reduce((sum, item) => sum + (Number(item.amount) || 0), 0);
-
-  // Search and Payment Mode filtering
+  // Search filtering
   const displayedIncomes = yearFilteredIncomes.filter((item) => {
     const matchesSearch = 
       (item.title && item.title.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (item.source && item.source.toLowerCase().includes(searchTerm.toLowerCase())) ||
-      (item.referenceNumber && item.referenceNumber.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (item.receivedBy && item.receivedBy.toLowerCase().includes(searchTerm.toLowerCase()));
 
-    const matchesPaymentMode = selectedPaymentMode === 'ALL' || item.paymentMode === selectedPaymentMode;
-
-    return matchesSearch && matchesPaymentMode;
+    return matchesSearch;
   });
 
   // Export CSV
   const handleExportCSV = () => {
-    const headers = ['Voucher / Ref No', 'Date', 'Title', 'Source', 'Payment Mode', 'Amount', 'Received By', 'Academic Year', 'Remarks'];
+    const headers = ['Date', 'Title', 'Source / Received From', 'Amount', 'Received By', 'Academic Year', 'Remarks'];
     const rows = displayedIncomes.map((i) => [
-      `"${i.referenceNumber || i.id || ''}"`,
       `"${i.date || ''}"`,
       `"${i.title || ''}"`,
       `"${i.source || ''}"`,
-      `"${i.paymentMode || ''}"`,
       i.amount || 0,
       `"${i.receivedBy || ''}"`,
       `"${i.academicYear || ''}"`,
@@ -91,7 +75,7 @@ export const Incomes = ({
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-              Department Treasury Inflow
+              Department Inflows
             </span>
             <span className="text-xs text-slate-400">•</span>
             <span className="text-xs font-medium text-slate-500">
@@ -126,7 +110,7 @@ export const Incomes = ({
         </div>
       </div>
 
-      {/* KPI Cards Grid (Focused Purely on Department Incomes) */}
+      {/* KPI Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* 1. Total Department Incomes */}
         <div className="p-5 rounded-2xl bg-white border border-emerald-200 shadow-2xs flex flex-col justify-between">
@@ -142,54 +126,54 @@ export const Incomes = ({
             <div className="text-2xl sm:text-3xl font-bold font-mono text-emerald-800">
               {formatCurrency(stats.totalAmount)}
             </div>
-            <div className="flex items-center gap-1 text-xs text-slate-400 font-medium mt-1">
-              <span>{stats.totalCount} income records logged</span>
+            <div className="text-xs text-slate-400 font-medium mt-1">
+              Recorded revenue for AY {selectedAcademicYear}
             </div>
           </div>
         </div>
 
-        {/* 2. Cash Collections */}
+        {/* 2. Total Records */}
         <div className="p-5 rounded-2xl bg-white border border-blue-200 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              Cash Collections
+              Recorded Entries
             </span>
             <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-700 flex items-center justify-center">
-              <Landmark className="w-5 h-5" />
+              <FileCheck className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
             <div className="text-2xl sm:text-3xl font-bold font-mono text-blue-800">
-              {formatCurrency(cashIncomes)}
+              {stats.totalCount}
             </div>
             <div className="text-xs text-slate-400 font-medium mt-1">
-              Collected via direct cash
+              Total income transactions logged
             </div>
           </div>
         </div>
 
-        {/* 3. Digital / UPI Collections */}
+        {/* 3. Average Collection */}
         <div className="p-5 rounded-2xl bg-white border border-amber-200 shadow-2xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold uppercase tracking-wider text-slate-500">
-              UPI & Online Inflow
+              Average per Entry
             </span>
             <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center">
-              <CreditCard className="w-5 h-5" />
+              <TrendingUp className="w-5 h-5" />
             </div>
           </div>
           <div className="mt-3">
             <div className="text-2xl sm:text-3xl font-bold font-mono text-amber-800">
-              {formatCurrency(digitalIncomes)}
+              {formatCurrency(avgIncome)}
             </div>
             <div className="text-xs text-slate-400 font-medium mt-1">
-              UPI, Bank Transfers & Cheques
+              Average revenue collection per record
             </div>
           </div>
         </div>
       </div>
 
-      {/* Filter & Search Bar */}
+      {/* Search & Filter Bar */}
       <div className="p-4 bg-white rounded-2xl border border-slate-200 shadow-2xs">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           {/* Search */}
@@ -197,46 +181,31 @@ export const Incomes = ({
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <input
               type="text"
-              placeholder="Search by title, source, voucher ID, or staff coordinator..."
+              placeholder="Search by title, source, or staff coordinator..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full pl-9 pr-3.5 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white text-slate-900 transition-all"
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Payment Mode Selector */}
+          {/* Academic Year Selector */}
+          <div className="flex items-center gap-1.5">
+            <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
             <select
-              value={selectedPaymentMode}
-              onChange={(e) => setSelectedPaymentMode(e.target.value)}
+              value={selectedAcademicYear}
+              onChange={(e) => onSelectAcademicYear(e.target.value)}
               className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white"
             >
-              <option value="ALL">All Payment Modes</option>
-              <option value="Cash">Cash</option>
-              <option value="UPI / Online">UPI / Online</option>
-              <option value="Bank Transfer">Bank Transfer</option>
-              <option value="Cheque">Cheque</option>
+              <option value="2025-2026">AY 2025-2026</option>
+              <option value="2024-2025">AY 2024-2025</option>
+              <option value="2026-2027">AY 2026-2027</option>
+              <option value="ALL">All Academic Years</option>
             </select>
-
-            {/* Academic Year Selector */}
-            <div className="flex items-center gap-1.5">
-              <Calendar className="w-4 h-4 text-slate-400 shrink-0" />
-              <select
-                value={selectedAcademicYear}
-                onChange={(e) => onSelectAcademicYear(e.target.value)}
-                className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white"
-              >
-                <option value="2025-2026">AY 2025-2026</option>
-                <option value="2024-2025">AY 2024-2025</option>
-                <option value="2026-2027">AY 2026-2027</option>
-                <option value="ALL">All Academic Years</option>
-              </select>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* Incomes Table / List */}
+      {/* Incomes Table */}
       <div className="bg-white rounded-2xl border border-slate-200 shadow-2xs overflow-hidden">
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
           <h2 className="text-sm font-bold text-slate-900">
@@ -269,7 +238,6 @@ export const Incomes = ({
                   <th className="py-3 px-4">Date</th>
                   <th className="py-3 px-4">Income Title / Purpose</th>
                   <th className="py-3 px-4">Source / Received From</th>
-                  <th className="py-3 px-4">Payment Mode</th>
                   <th className="py-3 px-4">Received By</th>
                   <th className="py-3 px-4 text-right">Amount</th>
                   <th className="py-3 px-4 text-center">Actions</th>
@@ -293,18 +261,6 @@ export const Incomes = ({
 
                     <td className="py-3.5 px-4 text-slate-700 font-medium">
                       {item.source || 'ECE Dept'}
-                    </td>
-
-                    <td className="py-3.5 px-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <CreditCard className="w-3.5 h-3.5 text-slate-400" />
-                        <span className="font-semibold text-slate-800">{item.paymentMode || 'Cash'}</span>
-                      </div>
-                      {item.referenceNumber && (
-                        <span className="text-[10px] font-mono text-slate-400 block mt-0.5">
-                          {item.referenceNumber}
-                        </span>
-                      )}
                     </td>
 
                     <td className="py-3.5 px-4 text-slate-700 font-medium">

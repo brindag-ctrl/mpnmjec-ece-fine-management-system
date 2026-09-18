@@ -127,29 +127,12 @@ export const IncomeReceiptModal = ({ isOpen, onClose, income }) => {
                 </div>
               </div>
 
-              {/* Payment Mode & Reference */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="flex items-baseline">
-                  <span className="whitespace-nowrap text-slate-700 font-normal">Payment Mode:</span>
-                  <span className="flex-1 ml-2 font-bold text-slate-950 border-b border-dotted border-slate-800 pb-0.5">
-                    {income.paymentMode || 'Cash'}
-                  </span>
-                </div>
-                {income.referenceNumber ? (
-                  <div className="flex items-baseline">
-                    <span className="whitespace-nowrap text-slate-700 font-normal">Txn / Ref No:</span>
-                    <span className="flex-1 ml-2 font-mono font-bold text-slate-950 border-b border-dotted border-slate-800 pb-0.5">
-                      {income.referenceNumber}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="flex items-baseline">
-                    <span className="whitespace-nowrap text-slate-700 font-normal">Received By:</span>
-                    <span className="flex-1 ml-2 font-semibold text-slate-950 border-b border-dotted border-slate-800 pb-0.5">
-                      {income.receivedBy || 'Staff Coordinator'}
-                    </span>
-                  </div>
-                )}
+              {/* Received By */}
+              <div className="flex items-baseline">
+                <span className="whitespace-nowrap text-slate-700 font-normal">Received By:</span>
+                <span className="flex-1 ml-2 font-semibold text-slate-950 border-b border-dotted border-slate-800 pb-0.5">
+                  {income.receivedBy || 'Staff Coordinator'}
+                </span>
               </div>
 
               {/* Remarks if any */}
